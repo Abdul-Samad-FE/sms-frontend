@@ -87,8 +87,9 @@
   --health-maintenance: #a78bfa;
 
   /* Fonts — mono stack for numerics, sans for everything else */
-  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'Fira Code', 'SF Mono',
-    'Menlo', ui-monospace, monospace;
+  --font-mono:
+    'JetBrains Mono', 'IBM Plex Mono', 'Fira Code', 'SF Mono', 'Menlo',
+    ui-monospace, monospace;
   --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
   /* Terminal — always dark regardless of app theme */

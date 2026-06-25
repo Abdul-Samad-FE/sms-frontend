@@ -81,6 +81,31 @@
     border-width: 1px;
   }
 
+  /* Glass card surface — used by stat cards and table/panel containers.
+     Gives every card a visible border + subtle elevation. Utilities like
+     `p-0` or `border-[var(--card-border)]` still override per-instance. */
+  .card-glass {
+    background-color: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    color: var(--card-foreground);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+
+  /* Stat cards lift slightly on hover for a touch of polish. */
+  .card-glass:hover {
+    border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+    box-shadow: 0 2px 8px 0 rgb(0 0 0 / 0.08);
+  }
+
+  .header-glass {
+    background-color: color-mix(in srgb, var(--muted) 40%, transparent);
+  }
+
   .list-item {
     background-color: var(--card);
     border-color: var(--border);
@@ -530,7 +555,8 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: linear-gradient(var(--chart-grid) 1px, transparent 1px),
+  background-image:
+    linear-gradient(var(--chart-grid) 1px, transparent 1px),
     linear-gradient(90deg, var(--chart-grid) 1px, transparent 1px);
   background-size: 8px 8px;
   opacity: 0;

@@ -7,7 +7,27 @@ import StudentTable from './components/StudentTable';
 import AddStudentModal from './components/AddStudentModal';
 import StudentViewModal from './components/StudentViewModal';
 import StudentCardModal from './components/StudentCardModal';
+import PermissionGuard from '../../components/PermissionGuard';
+import ExportCsvButton from '../../components/ExportCsvButton';
 import { useTheme } from '../../theme';
+
+const STUDENT_CSV_COLUMNS = [
+  { header: 'Admission No', key: 'admission_number' },
+  { header: 'Enroll No', key: 'enroll_no' },
+  { header: 'Name', key: 'name' },
+  { header: 'Gender', key: 'gender' },
+  { header: 'Class', key: 'class_name' },
+  { header: 'Section', key: 'section' },
+  { header: 'Father Name', key: 'father_name' },
+  { header: 'Contact', key: 'father_contact' },
+  { header: 'Status', key: 'status' },
+  { header: 'DOB', accessor: (s) => (s.dob ? String(s.dob).slice(0, 10) : '') },
+  {
+    header: 'Admission Date',
+    accessor: (s) => (s.admission_date ? String(s.admission_date).slice(0, 10) : ''),
+  },
+  { header: 'Address', key: 'address' },
+];
 
 export default function Students() {
   const { toggleTheme } = useTheme();
@@ -63,15 +83,19 @@ export default function Students() {
       notification.success({ message: 'Student deleted successfully!' });
       fetchStudents(); // Refresh table
     } catch (err) {
-      console.error("Delete Error:", err.response || err);
-      notification.error({ message: 'Failed to delete student. Please check if the ID is valid.' });
+      console.error('Delete Error:', err.response || err);
+      notification.error({
+        message: 'Failed to delete student. Please check if the ID is valid.',
+      });
     }
   };
 
   // Derived state
   const filteredStudents = useMemo(() => {
     if (selectedClass === 'All') return studentsArray;
-    return studentsArray.filter(student => student.class_id === selectedClass);
+    return studentsArray.filter(
+      (student) => student.class_id === selectedClass
+    );
   }, [selectedClass, studentsArray]);
 
   return (
@@ -89,7 +113,9 @@ export default function Students() {
 
         <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2 bg-[var(--muted)] px-3 py-2 rounded-lg border border-[var(--border)]">
-            <span className="text-sm text-[var(--muted-foreground)] font-medium">Filter by Class:</span>
+            <span className="text-sm text-[var(--muted-foreground)] font-medium">
+              Filter by Class:
+            </span>
             <Select
               value={selectedClass}
               onChange={(val) => setSelectedClass(val)}
@@ -98,18 +124,26 @@ export default function Students() {
               bordered={false}
               options={[
                 { value: 'All', label: 'All Classes' },
-                ...classes.map(c => ({ value: c.id, label: c.class_name }))
+                ...classes.map((c) => ({ value: c.id, label: c.class_name })),
               ]}
             />
           </div>
 
-          <Button
-            type="primary"
-            onClick={handleAddClick}
-            className="btn-primary border-0"
-          >
-            + Add Student
-          </Button>
+          <ExportCsvButton
+            filename="students"
+            columns={STUDENT_CSV_COLUMNS}
+            rows={filteredStudents}
+          />
+
+          <PermissionGuard permission="student:create">
+            <Button
+              type="primary"
+              onClick={handleAddClick}
+              className="btn-primary border-0"
+            >
+              + Add Student
+            </Button>
+          </PermissionGuard>
 
           <button
             onClick={toggleTheme}

@@ -45,18 +45,35 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
-  const value = useMemo(
-    () => ({
+  const value = useMemo(() => {
+    const permissions = user?.permissions ?? [];
+    const modules = user?.accessible_modules ?? [];
+    const isSuperuser = user?.is_superuser === true;
+
+    // Superusers implicitly hold every permission and see every module —
+    // their permission list may be fully populated, but we don't rely on it.
+    const hasPermission = (key) => isSuperuser || permissions.includes(key);
+    const hasAnyPermission = (keys = []) =>
+      isSuperuser || keys.some((k) => permissions.includes(k));
+    const hasAllPermissions = (keys = []) =>
+      isSuperuser || keys.every((k) => permissions.includes(k));
+    const hasModule = (name) => isSuperuser || modules.includes(name);
+
+    return {
       user,
       token,
       isAuthenticated: !!token,
-      permissions: user?.permissions ?? [],
-      hasPermission: (key) => (user?.permissions ?? []).includes(key),
+      isSuperuser,
+      permissions,
+      modules,
+      hasPermission,
+      hasAnyPermission,
+      hasAllPermissions,
+      hasModule,
       login,
       logout,
-    }),
-    [user, token, login, logout]
-  );
+    };
+  }, [user, token, login, logout]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

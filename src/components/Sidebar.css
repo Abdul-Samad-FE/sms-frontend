@@ -39,7 +39,8 @@
   color: var(--accent) !important;
 }
 
-.sidebar-glass .ant-menu-item .anticon, .sidebar-glass .ant-menu-item svg {
+.sidebar-glass .ant-menu-item .anticon,
+.sidebar-glass .ant-menu-item svg {
   margin-right: 0 !important;
   font-size: 24px !important;
   color: inherit !important;

@@ -8,7 +8,7 @@ export const MOCK_STUDENTS = [
     address: '123 Elm St, Townsville',
     class_name: 'Grade 10', // Simplified mapped relationship for UI simulation
     status: 'Active',
-    created_at: '2023-08-15T09:00:00Z'
+    created_at: '2023-08-15T09:00:00Z',
   },
   {
     id: 2,
@@ -19,7 +19,7 @@ export const MOCK_STUDENTS = [
     address: '456 Oak Ave, Townsville',
     class_name: 'Grade 10',
     status: 'Struck-off',
-    created_at: '2023-08-16T10:30:00Z'
+    created_at: '2023-08-16T10:30:00Z',
   },
   {
     id: 3,
@@ -30,7 +30,7 @@ export const MOCK_STUDENTS = [
     address: '789 Pine Rd, Springfield',
     class_name: 'Grade 9',
     status: 'Active',
-    created_at: '2023-08-14T08:15:00Z'
+    created_at: '2023-08-14T08:15:00Z',
   },
   {
     id: 4,
@@ -41,7 +41,7 @@ export const MOCK_STUDENTS = [
     address: '101 Maple Dr, Springfield',
     class_name: 'Grade 11',
     status: 'Active',
-    created_at: '2023-08-10T14:45:00Z'
+    created_at: '2023-08-10T14:45:00Z',
   },
   {
     id: 5,
@@ -52,7 +52,7 @@ export const MOCK_STUDENTS = [
     address: '222 Cedar Ln, Shelbyville',
     class_name: 'Grade 9',
     status: 'Active',
-    created_at: '2023-08-18T11:20:00Z'
+    created_at: '2023-08-18T11:20:00Z',
   },
   {
     id: 6,
@@ -63,12 +63,8 @@ export const MOCK_STUDENTS = [
     address: '333 Birch Blvd, Shelbyville',
     class_name: 'Grade 10',
     status: 'Active',
-    created_at: '2023-08-19T09:10:00Z'
-  }
+    created_at: '2023-08-19T09:10:00Z',
+  },
 ];
 
-export const MOCK_CLASSES = [
-  'Grade 9',
-  'Grade 10',
-  'Grade 11',
-];
+export const MOCK_CLASSES = ['Grade 9', 'Grade 10', 'Grade 11'];

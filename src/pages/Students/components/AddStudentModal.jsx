@@ -1,11 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Form, Input, Select, DatePicker, Button, notification } from 'antd';
+import {
+  Modal,
+  Form,
+  Input,
+  Select,
+  DatePicker,
+  Button,
+  notification,
+} from 'antd';
 import dayjs from 'dayjs';
 import { createStudent, updateStudent } from '../../../api/students';
 import { listClasses } from '../../../api/classes';
 import { useAuth } from '../../../context/AuthContext';
 
-export default function AddStudentModal({ isOpen, onClose, onSuccess, editData }) {
+export default function AddStudentModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  editData,
+}) {
   const [form] = Form.useForm();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -26,7 +39,9 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess, editData }
           section: editData.section,
           gender: editData.gender,
           dob: editData.dob ? dayjs(editData.dob) : null,
-          admission_date: editData.admission_date ? dayjs(editData.admission_date) : null,
+          admission_date: editData.admission_date
+            ? dayjs(editData.admission_date)
+            : null,
           status: editData.status || 'Active',
         });
       } else {
@@ -42,7 +57,7 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess, editData }
         const data = await listClasses();
         setClasses(data);
       } catch (err) {
-        console.error("Failed to load classes:", err);
+        console.error('Failed to load classes:', err);
       }
     };
     if (isOpen) fetchClasses();
@@ -70,25 +85,27 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess, editData }
       const payload = {
         name: values.student_name,
         father_name: values.father_name,
-        father_contact: values.father_contact || "N/A",
-        address: values.address || "N/A",
+        father_contact: values.father_contact || 'N/A',
+        address: values.address || 'N/A',
         admission_number: values.admission_number,
         section: values.section,
         gender: values.gender,
         dob: values.dob ? values.dob.toISOString() : null,
-        admission_date: values.admission_date ? values.admission_date.toISOString() : null,
-        status: values.status || "Active",
+        admission_date: values.admission_date
+          ? values.admission_date.toISOString()
+          : null,
+        status: values.status || 'Active',
         school_id: schoolId,
-        class_id: values.class_id // Use selected class ID!
+        class_id: values.class_id, // Use selected class ID!
       };
 
       let result;
       if (editData?.id) {
         result = await updateStudent(editData.id, payload);
-        notification.success({ message: "Student updated successfully!" });
+        notification.success({ message: 'Student updated successfully!' });
       } else {
         result = await createStudent(payload);
-        notification.success({ message: "Student added successfully!" });
+        notification.success({ message: 'Student added successfully!' });
       }
 
       form.resetFields();
@@ -96,8 +113,11 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess, editData }
       onSuccess(result);
     } catch (err) {
       notification.error({
-        message: editData?.id ? "Failed to update student" : "Failed to create student",
-        description: err.response?.data?.detail || "Check your network or constraints."
+        message: editData?.id
+          ? 'Failed to update student'
+          : 'Failed to create student',
+        description:
+          err.response?.data?.detail || 'Check your network or constraints.',
       });
     } finally {
       setLoading(false);
@@ -106,7 +126,7 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess, editData }
 
   return (
     <Modal
-      title={editData ? "Edit Student Details" : "Create New Student"}
+      title={editData ? 'Edit Student Details' : 'Create New Student'}
       open={isOpen}
       onCancel={() => {
         form.resetFields();
@@ -161,7 +181,11 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess, editData }
             rules={[{ required: true, message: 'Class is required!' }]}
           >
             <Select placeholder="Select Class">
-              {classes.map(cls => <Select.Option key={cls.id} value={cls.id}>{cls.class_name}</Select.Option>)}
+              {classes.map((cls) => (
+                <Select.Option key={cls.id} value={cls.id}>
+                  {cls.class_name}
+                </Select.Option>
+              ))}
             </Select>
           </Form.Item>
 
@@ -194,9 +218,20 @@ export default function AddStudentModal({ isOpen, onClose, onSuccess, editData }
         </div>
 
         <div className="flex justify-end gap-3 mt-4">
-          <Button onClick={onClose} disabled={loading} className="bg-transparent border-[var(--border)] text-[var(--foreground)]">Cancel</Button>
-          <Button type="primary" htmlType="submit" loading={loading} className="btn-primary border-0">
-            {editData ? "Update Student" : "Submit"}
+          <Button
+            onClick={onClose}
+            disabled={loading}
+            className="bg-transparent border-[var(--border)] text-[var(--foreground)]"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            className="btn-primary border-0"
+          >
+            {editData ? 'Update Student' : 'Submit'}
           </Button>
         </div>
       </Form>

@@ -21,8 +21,7 @@ export default function Login() {
       notification.error({
         message: 'Sign in failed',
         description:
-          err.response?.data?.detail ||
-          'Check your credentials and try again.',
+          err.response?.data?.detail || 'Check your credentials and try again.',
       });
     } finally {
       setLoading(false);

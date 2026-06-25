@@ -4,9 +4,13 @@ import { Layout, Menu, Switch } from 'antd';
 import { useTheme } from '../theme';
 import { useAuth } from '../context/AuthContext';
 import {
+  CalendarIcon,
   DashboardIcon,
+  LayersIcon,
   LogoIcon,
   LogoutIcon,
+  ShieldIcon,
+  UserCogIcon,
   UsersIcon,
 } from './Icons';
 import './Sidebar.css';
@@ -17,20 +21,52 @@ const Sidebar = ({ collapsed = true }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDark, setTheme } = useTheme();
-  const { logout } = useAuth();
+  const { logout, hasPermission, hasModule } = useAuth();
 
-  const items = [
+  // Each item declares the access it needs; the sidebar hides what the user
+  // can't reach. `visible` returns true when the current user has access.
+  const allItems = [
     {
       key: '/dashboard',
       icon: <DashboardIcon className="text-2xl" />,
       label: 'Dashboard',
+      visible: () => hasModule('dashboard'),
     },
     {
       key: '/students',
       icon: <UsersIcon className="text-2xl" />,
       label: 'Students',
+      visible: () => hasPermission('student:read'),
+    },
+    {
+      key: '/classes',
+      icon: <LayersIcon className="text-2xl" />,
+      label: 'Classes',
+      visible: () => hasPermission('class:read'),
+    },
+    {
+      key: '/attendance',
+      icon: <CalendarIcon className="text-2xl" />,
+      label: 'Attendance',
+      visible: () => hasPermission('attendance:read'),
+    },
+    {
+      key: '/users',
+      icon: <UserCogIcon className="text-2xl" />,
+      label: 'Users',
+      visible: () => hasPermission('user:read'),
+    },
+    {
+      key: '/roles',
+      icon: <ShieldIcon className="text-2xl" />,
+      label: 'Roles',
+      visible: () => hasModule('admin'),
     },
   ];
+
+  const items = allItems
+    .filter((item) => item.visible())
+    .map(({ visible, ...item }) => item);
 
   const handleLogout = async () => {
     await logout();
@@ -46,7 +82,9 @@ const Sidebar = ({ collapsed = true }) => {
       className="sidebar-glass"
     >
       <div className="h-16 flex justify-center items-center mb-5">
-        <LogoIcon style={{ width: '32px', height: '32px', color: 'var(--primary)' }} />
+        <LogoIcon
+          style={{ width: '32px', height: '32px', color: 'var(--primary)' }}
+        />
       </div>
       <Menu
         theme={isDark ? 'dark' : 'light'}
@@ -71,7 +109,9 @@ const Sidebar = ({ collapsed = true }) => {
           className="cursor-pointer hover:opacity-80 transition-opacity flex justify-center items-center p-2 rounded-lg hover:bg-white/5"
           onClick={handleLogout}
         >
-          <LogoutIcon style={{ width: '24px', height: '24px', color: '#ff4d4f' }} />
+          <LogoutIcon
+            style={{ width: '24px', height: '24px', color: '#ff4d4f' }}
+          />
         </div>
       </div>
     </Sider>
