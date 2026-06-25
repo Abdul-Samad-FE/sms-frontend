@@ -55,7 +55,9 @@ export default function PermissionAssignment({
   return (
     <div className="flex flex-col gap-4 max-h-[45vh] overflow-y-auto pr-1">
       {groups.map(([moduleName, groupPerms]) => {
-        const selectedCount = groupPerms.filter((p) => selected.has(p.id)).length;
+        const selectedCount = groupPerms.filter((p) =>
+          selected.has(p.id)
+        ).length;
         const allChecked = selectedCount === groupPerms.length;
         const indeterminate = selectedCount > 0 && !allChecked;
         return (

@@ -124,7 +124,9 @@ export default function UserFormModal({ open, onClose, editData }) {
         <Form.Item
           name="password"
           label={isEdit ? 'New Password' : 'Password'}
-          tooltip={isEdit ? 'Leave blank to keep the current password' : undefined}
+          tooltip={
+            isEdit ? 'Leave blank to keep the current password' : undefined
+          }
           rules={
             isEdit
               ? [{ min: 8, message: 'At least 8 characters' }]
@@ -135,7 +137,9 @@ export default function UserFormModal({ open, onClose, editData }) {
           }
         >
           <Input.Password
-            placeholder={isEdit ? 'Leave blank to keep current' : 'Min 8 characters'}
+            placeholder={
+              isEdit ? 'Leave blank to keep current' : 'Min 8 characters'
+            }
             autoComplete="new-password"
           />
         </Form.Item>

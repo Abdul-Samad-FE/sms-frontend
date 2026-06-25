@@ -41,7 +41,8 @@ const buildDraft = (students, existingByStudent) =>
  */
 export default function MarkAttendance() {
   const { user, hasPermission } = useAuth();
-  const canMark = user?.is_superuser === true || hasPermission('attendance:create');
+  const canMark =
+    user?.is_superuser === true || hasPermission('attendance:create');
 
   const [classId, setClassId] = useState(null);
   const [date, setDate] = useState(() => dayjs());
@@ -128,7 +129,9 @@ export default function MarkAttendance() {
       ? students[0]?.school_id
       : user?.school_id;
     if (schoolId == null) {
-      notification.error({ message: 'Unable to determine the school to save against.' });
+      notification.error({
+        message: 'Unable to determine the school to save against.',
+      });
       return;
     }
     const records = students.map((s) => ({
@@ -217,7 +220,9 @@ export default function MarkAttendance() {
             variant="borderless"
             options={classes.map((c) => ({
               value: c.id,
-              label: c.section ? `${c.class_name} - ${c.section}` : c.class_name,
+              label: c.section
+                ? `${c.class_name} - ${c.section}`
+                : c.class_name,
             }))}
           />
         </div>
@@ -281,7 +286,10 @@ export default function MarkAttendance() {
         </div>
       ) : (
         <>
-          <AttendanceSummaryCards records={draftRecords} total={students.length} />
+          <AttendanceSummaryCards
+            records={draftRecords}
+            total={students.length}
+          />
 
           {existingCount > 0 && (
             <div className="px-2">

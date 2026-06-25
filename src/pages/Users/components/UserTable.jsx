@@ -67,7 +67,7 @@ export default function UserTable({
         schoolId == null ? (
           <span className="text-[var(--muted-foreground)]">All (global)</span>
         ) : (
-          schoolNameById.get(schoolId) ?? `#${schoolId}`
+          (schoolNameById.get(schoolId) ?? `#${schoolId}`)
         ),
     },
     {
@@ -109,7 +109,9 @@ export default function UserTable({
                   size="small"
                   danger
                   disabled={isSelf}
-                  title={isSelf ? 'You cannot delete your own account' : undefined}
+                  title={
+                    isSelf ? 'You cannot delete your own account' : undefined
+                  }
                   loading={deletingId === record.id}
                   icon={<Trash2Icon className="w-4 h-4" />}
                 />

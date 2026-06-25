@@ -6,7 +6,10 @@ import { LayersIcon, UsersIcon, ActivityIcon } from '../../../components/Icons';
  *
  * @param {{ classCount?: number, studentTotal?: number }} props
  */
-export default function ClassSummaryCards({ classCount = 0, studentTotal = 0 }) {
+export default function ClassSummaryCards({
+  classCount = 0,
+  studentTotal = 0,
+}) {
   const avg = useMemo(
     () => (classCount ? Math.round((studentTotal / classCount) * 10) / 10 : 0),
     [classCount, studentTotal]

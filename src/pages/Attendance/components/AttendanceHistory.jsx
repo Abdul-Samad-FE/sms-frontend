@@ -42,8 +42,10 @@ const ATTENDANCE_CSV_COLUMNS = [
  */
 export default function AttendanceHistory() {
   const { user, hasPermission } = useAuth();
-  const canUpdate = user?.is_superuser === true || hasPermission('attendance:update');
-  const canDelete = user?.is_superuser === true || hasPermission('attendance:delete');
+  const canUpdate =
+    user?.is_superuser === true || hasPermission('attendance:update');
+  const canDelete =
+    user?.is_superuser === true || hasPermission('attendance:delete');
 
   const [classId, setClassId] = useState(null);
   const [date, setDate] = useState(null);
@@ -158,7 +160,8 @@ export default function AttendanceHistory() {
       title: 'Remarks',
       dataIndex: 'remarks',
       key: 'remarks',
-      render: (v) => v || <span className="text-[var(--muted-foreground)]">—</span>,
+      render: (v) =>
+        v || <span className="text-[var(--muted-foreground)]">—</span>,
     },
   ];
 
@@ -182,7 +185,11 @@ export default function AttendanceHistory() {
               okButtonProps={{ danger: true }}
               onConfirm={() => handleDelete(record.id)}
             >
-              <Button size="small" danger icon={<Trash2Icon className="w-4 h-4" />} />
+              <Button
+                size="small"
+                danger
+                icon={<Trash2Icon className="w-4 h-4" />}
+              />
             </Popconfirm>
           )}
         </Space>
@@ -210,7 +217,9 @@ export default function AttendanceHistory() {
             variant="borderless"
             options={classes.map((c) => ({
               value: c.id,
-              label: c.section ? `${c.class_name} - ${c.section}` : c.class_name,
+              label: c.section
+                ? `${c.class_name} - ${c.section}`
+                : c.class_name,
             }))}
           />
         </div>
@@ -259,7 +268,11 @@ export default function AttendanceHistory() {
             showIcon
             message="Failed to load attendance history."
             action={
-              <Button size="small" danger onClick={() => attendanceQuery.refetch()}>
+              <Button
+                size="small"
+                danger
+                onClick={() => attendanceQuery.refetch()}
+              >
                 Retry
               </Button>
             }

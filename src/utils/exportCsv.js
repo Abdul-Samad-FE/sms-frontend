@@ -33,7 +33,9 @@ export function toCsv(columns, rows) {
   const dataLines = rows.map((row) =>
     columns
       .map((c) =>
-        escapeCell(typeof c.accessor === 'function' ? c.accessor(row) : row[c.key])
+        escapeCell(
+          typeof c.accessor === 'function' ? c.accessor(row) : row[c.key]
+        )
       )
       .join(',')
   );

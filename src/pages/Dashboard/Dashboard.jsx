@@ -21,8 +21,14 @@ const toSummary = (stats) => ({
 
 export default function Dashboard() {
   const { toggleTheme } = useTheme();
-  const { data: stats, isLoading, isError, error, refetch, isFetching } =
-    useDashboardStats();
+  const {
+    data: stats,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useDashboardStats();
 
   const lastUpdated = stats?.generated_at ? new Date(stats.generated_at) : null;
 
@@ -80,7 +86,11 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 px-2">
             {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="card-glass">
-                <Skeleton active paragraph={{ rows: 1 }} title={{ width: '60%' }} />
+                <Skeleton
+                  active
+                  paragraph={{ rows: 1 }}
+                  title={{ width: '60%' }}
+                />
               </div>
             ))}
           </div>

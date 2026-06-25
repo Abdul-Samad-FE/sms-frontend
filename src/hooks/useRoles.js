@@ -1,10 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  createRole,
-  deleteRole,
-  listRoles,
-  updateRole,
-} from '../api/admin';
+import { createRole, deleteRole, listRoles, updateRole } from '../api/admin';
 
 export const roleKeys = {
   all: ['roles'],

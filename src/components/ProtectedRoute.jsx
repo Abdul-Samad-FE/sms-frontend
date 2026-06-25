@@ -29,8 +29,13 @@ export default function ProtectedRoute({
   module,
   requireSuperuser,
 }) {
-  const { isAuthenticated, isSuperuser, hasPermission, hasAnyPermission, hasModule } =
-    useAuth();
+  const {
+    isAuthenticated,
+    isSuperuser,
+    hasPermission,
+    hasAnyPermission,
+    hasModule,
+  } = useAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {

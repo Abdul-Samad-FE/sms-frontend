@@ -59,7 +59,11 @@ export default function Roles() {
 
         <div className="flex flex-wrap items-center gap-4">
           {canManage && (
-            <Button type="primary" onClick={handleAdd} className="btn-primary border-0">
+            <Button
+              type="primary"
+              onClick={handleAdd}
+              className="btn-primary border-0"
+            >
               + Add Role
             </Button>
           )}
@@ -107,7 +111,9 @@ export default function Roles() {
             onEdit={handleEdit}
             onDelete={handleDelete}
             canManage={canManage}
-            deletingId={deleteMutation.isPending ? deleteMutation.variables : null}
+            deletingId={
+              deleteMutation.isPending ? deleteMutation.variables : null
+            }
           />
         </div>
       )}

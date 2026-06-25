@@ -91,7 +91,11 @@ export default function Classes() {
             rows={classes}
           />
           {canCreate && (
-            <Button type="primary" onClick={handleAdd} className="btn-primary border-0">
+            <Button
+              type="primary"
+              onClick={handleAdd}
+              className="btn-primary border-0"
+            >
               + Add Class
             </Button>
           )}
@@ -111,7 +115,11 @@ export default function Classes() {
             showIcon
             message="Failed to load classes."
             action={
-              <Button size="small" danger onClick={() => classesQuery.refetch()}>
+              <Button
+                size="small"
+                danger
+                onClick={() => classesQuery.refetch()}
+              >
                 Retry
               </Button>
             }
@@ -134,7 +142,9 @@ export default function Classes() {
               onDelete={handleDelete}
               canUpdate={canUpdate}
               canDelete={canDelete}
-              deletingId={deleteMutation.isPending ? deleteMutation.variables : null}
+              deletingId={
+                deleteMutation.isPending ? deleteMutation.variables : null
+              }
             />
           </div>
         </>

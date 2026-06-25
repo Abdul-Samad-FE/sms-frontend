@@ -40,7 +40,8 @@ export default function RoleTable({
       title: 'Description',
       dataIndex: 'description',
       key: 'description',
-      render: (d) => d || <span className="text-[var(--muted-foreground)]">—</span>,
+      render: (d) =>
+        d || <span className="text-[var(--muted-foreground)]">—</span>,
     },
     {
       title: 'Permissions',
@@ -79,7 +80,9 @@ export default function RoleTable({
                 size="small"
                 danger
                 disabled={isProtected}
-                title={isProtected ? 'Built-in roles cannot be deleted' : undefined}
+                title={
+                  isProtected ? 'Built-in roles cannot be deleted' : undefined
+                }
                 loading={deletingId === record.id}
                 icon={<Trash2Icon className="w-4 h-4" />}
               />

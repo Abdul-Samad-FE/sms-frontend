@@ -24,7 +24,8 @@ const STUDENT_CSV_COLUMNS = [
   { header: 'DOB', accessor: (s) => (s.dob ? String(s.dob).slice(0, 10) : '') },
   {
     header: 'Admission Date',
-    accessor: (s) => (s.admission_date ? String(s.admission_date).slice(0, 10) : ''),
+    accessor: (s) =>
+      s.admission_date ? String(s.admission_date).slice(0, 10) : '',
   },
   { header: 'Address', key: 'address' },
 ];

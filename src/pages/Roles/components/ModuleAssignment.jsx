@@ -14,17 +14,17 @@ import { Checkbox, Empty } from 'antd';
  *   onChange?: (ids: number[]) => void,
  * }} props
  */
-export default function ModuleAssignment({ modules = [], value = [], onChange }) {
+export default function ModuleAssignment({
+  modules = [],
+  value = [],
+  onChange,
+}) {
   if (!modules.length) {
     return <Empty description="No modules available." />;
   }
 
   return (
-    <Checkbox.Group
-      value={value}
-      onChange={onChange}
-      className="w-full"
-    >
+    <Checkbox.Group value={value} onChange={onChange} className="w-full">
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {modules.map((m) => (
           <Checkbox key={m.id} value={m.id}>
