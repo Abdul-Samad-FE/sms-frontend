@@ -1,0 +1,73 @@
+.sidebar-glass.ant-layout-sider {
+  position: fixed;
+  top: 0px;
+  left: 0;
+  bottom: 0px;
+  width: 65px !important;
+  min-width: 65px !important;
+  max-width: 65px !important;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  z-index: 100;
+  background-color: var(--sidebar-bg) !important;
+  backdrop-filter: blur(10px);
+  border-right: 1px solid var(--border);
+  border-radius: 0;
+}
+
+.sidebar-glass .ant-layout-sider-children {
+  background: transparent !important;
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  padding-top: 10px;
+}
+
+.sidebar-glass .ant-menu {
+  background: transparent;
+  border-right: none;
+}
+
+.sidebar-glass .ant-menu-item {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  padding: 0 !important;
+  margin-bottom: 24px !important;
+  color: var(--accent) !important;
+}
+
+.sidebar-glass .ant-menu-item .anticon, .sidebar-glass .ant-menu-item svg {
+  margin-right: 0 !important;
+  font-size: 24px !important;
+  color: inherit !important;
+}
+
+.sidebar-glass .ant-menu-item-selected {
+  background-color: var(--primary) !important;
+  color: white !important;
+  border-radius: 8px !important;
+}
+
+.sidebar-glass .ant-menu-item-selected svg {
+  color: white !important;
+}
+
+.sidebar-theme-toggle {
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.theme-switch-compact {
+  background: rgba(100, 100, 100, 0.2);
+  border: 1px solid rgba(100, 100, 100, 0.3);
+  scale: 0.85;
+}
+
+.theme-switch-compact.ant-switch-checked {
+  background: var(--primary) !important;
+}

@@ -1,0 +1,74 @@
+export const MOCK_STUDENTS = [
+  {
+    id: 1,
+    enroll_no: 'STU1001',
+    name: 'Jane Doe',
+    father_name: 'John Doe',
+    father_contact: '+1234567890',
+    address: '123 Elm St, Townsville',
+    class_name: 'Grade 10', // Simplified mapped relationship for UI simulation
+    status: 'Active',
+    created_at: '2023-08-15T09:00:00Z'
+  },
+  {
+    id: 2,
+    enroll_no: 'STU1002',
+    name: 'Robert Smith',
+    father_name: 'David Smith',
+    father_contact: '+1234567891',
+    address: '456 Oak Ave, Townsville',
+    class_name: 'Grade 10',
+    status: 'Struck-off',
+    created_at: '2023-08-16T10:30:00Z'
+  },
+  {
+    id: 3,
+    enroll_no: 'STU1003',
+    name: 'Emily Davis',
+    father_name: 'Michael Davis',
+    father_contact: '+1234567892',
+    address: '789 Pine Rd, Springfield',
+    class_name: 'Grade 9',
+    status: 'Active',
+    created_at: '2023-08-14T08:15:00Z'
+  },
+  {
+    id: 4,
+    enroll_no: 'STU1004',
+    name: 'Michael Brown',
+    father_name: 'William Brown',
+    father_contact: '+1234567893',
+    address: '101 Maple Dr, Springfield',
+    class_name: 'Grade 11',
+    status: 'Active',
+    created_at: '2023-08-10T14:45:00Z'
+  },
+  {
+    id: 5,
+    enroll_no: 'STU1005',
+    name: 'Sarah Wilson',
+    father_name: 'George Wilson',
+    father_contact: '+1234567894',
+    address: '222 Cedar Ln, Shelbyville',
+    class_name: 'Grade 9',
+    status: 'Active',
+    created_at: '2023-08-18T11:20:00Z'
+  },
+  {
+    id: 6,
+    enroll_no: 'STU1006',
+    name: 'James Taylor',
+    father_name: 'Thomas Taylor',
+    father_contact: '+1234567895',
+    address: '333 Birch Blvd, Shelbyville',
+    class_name: 'Grade 10',
+    status: 'Active',
+    created_at: '2023-08-19T09:10:00Z'
+  }
+];
+
+export const MOCK_CLASSES = [
+  'Grade 9',
+  'Grade 10',
+  'Grade 11',
+];

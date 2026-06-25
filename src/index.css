@@ -1,3 +1,844 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+/* Import Theme Styles */
+@import './theme/light.css';
+@import './theme/dark.css';
+
+@theme {
+  --color-error: #fb2c36;
+}
+
+@layer base {
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #a1a1a1;
+    height: 250px;
+    border-radius: 0 !important;
+    box-shadow: inset 0 0 0 10px #a1a1a1 !important;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #888;
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+}
+
+@layer components {
+  @keyframes critical-row-alert-pulse {
+    0%,
+    100% {
+      background-color: rgba(248, 113, 113, 0.18);
+    }
+
+    50% {
+      background-color: rgba(239, 68, 68, 0.36);
+    }
+  }
+
+  .table-row-critical-alert > td {
+    background-color: rgba(248, 113, 113, 0.18) !important;
+    color: #7f1d1d !important;
+    animation: critical-row-alert-pulse 1.2s ease-in-out infinite;
+  }
+
+  .table-row-critical-alert:hover > td {
+    background-color: rgba(239, 68, 68, 0.42) !important;
+  }
+
+  .btn-primary {
+    background-color: var(--primary);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--primary-hover);
+  }
+
+  .card {
+    background-color: var(--card);
+    border-color: var(--border);
+    color: var(--card-foreground);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    border-width: 1px;
+  }
+
+  .list-item {
+    background-color: var(--card);
+    border-color: var(--border);
+    color: var(--card-foreground);
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    border-width: 1px;
+    transition: background-color 0.2s;
+  }
+
+  .list-item:hover {
+    background-color: var(--muted);
+  }
+
+  /* Themed toast — overrides antd's internal text colors so the title and
+     description track the active theme instead of antd's default tokens. */
+  .notify-themed .ant-notification-notice-message {
+    color: var(--foreground) !important;
+  }
+  .notify-themed .ant-notification-notice-description {
+    color: var(--muted-foreground) !important;
+  }
+  /* antd renders the close affordance as a `<button>` wrapping an `<svg>`.
+     Setting color on the outer button alone isn't enough on dark themes
+     because the SVG fills from `currentColor`; we point the SVG + anticon
+     wrapper at `--foreground` directly so the cross is always visible. */
+  .notify-themed .ant-notification-notice-close,
+  .notify-themed .ant-notification-notice-close .anticon,
+  .notify-themed .ant-notification-notice-close .anticon svg {
+    color: var(--foreground) !important;
+    fill: currentColor !important;
+    opacity: 0.75;
+    transition: opacity 0.15s ease;
+  }
+  .notify-themed .ant-notification-notice-close:hover,
+  .notify-themed .ant-notification-notice-close:hover .anticon,
+  .notify-themed .ant-notification-notice-close:hover .anticon svg {
+    opacity: 1;
+  }
+
+  /* Minimal Sidebar Menu Styles */
+  .minimal-menu .ant-menu-item {
+    margin: 2px 0 !important;
+    padding: 0 !important;
+    height: 48px !important;
+    line-height: 48px !important;
+  }
+
+  .minimal-menu .ant-menu-item-selected {
+    background-color: var(--primary) !important;
+  }
+
+  .minimal-menu .ant-menu-item-selected .ant-menu-item-icon {
+    color: white !important;
+  }
+
+  .minimal-menu .ant-menu-item:hover {
+    background-color: var(--accent) !important;
+  }
+
+  /* Remove extra padding for collapsed menu */
+  .minimal-menu.ant-menu-inline-collapsed > .ant-menu-item {
+    padding-inline: calc(50% - 18px / 2) !important;
+  }
+
+  /* Force hide text in collapsed menu - only show icons */
+  .minimal-menu.ant-menu-inline-collapsed .ant-menu-title-content {
+    display: none !important;
+    opacity: 0 !important;
+    width: 0 !important;
+  }
+
+  /* Ensure icons are centered */
+  .minimal-menu.ant-menu-inline-collapsed .ant-menu-item-icon {
+    font-size: 16px !important;
+  }
+
+  /* Remove table row hover effects */
+  /* Navbar Custom Styles - Reference Match */
+  /* Navbar Custom Styles - Reference Match */
+  .navbar-menu-custom {
+    display: flex !important;
+    gap: 4px !important;
+  }
+
+  .navbar-menu-custom .ant-menu-item,
+  .navbar-menu-custom .ant-menu-submenu {
+    padding: 0 !important;
+    border-bottom: none !important;
+    transition: all 0.2s ease !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-weight: 400 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .navbar-menu-custom .ant-menu-title-content {
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    margin-inline: 0 !important;
+  }
+
+  .navbar-menu-custom .ant-menu-item > span,
+  .navbar-menu-custom .ant-menu-submenu-title {
+    padding: 0 12px !important;
+    display: flex !important;
+    align-items: center !important;
+    height: 100% !important;
+    color: inherit !important;
+  }
+
+  /* Shared Item Style - Normalizing height and alignment */
+  .navbar-menu-custom .ant-menu-item .ant-menu-title-content,
+  .navbar-menu-custom .ant-menu-submenu .ant-menu-submenu-title {
+    height: 36px !important;
+    line-height: 36px !important;
+    display: flex !important;
+    align-items: center !important;
+    padding: 0 12px !important;
+    background-color: transparent !important;
+    border-radius: 2px !important;
+    transition: all 0.2s ease !important;
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  /* Active/Selected State */
+  .navbar-menu-custom .ant-menu-item-selected .ant-menu-title-content,
+  .navbar-menu-custom .ant-menu-submenu-selected .ant-menu-submenu-title {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    color: #ffffff !important;
+  }
+
+  /* Hover State */
+  .navbar-menu-custom .ant-menu-item:hover .ant-menu-title-content,
+  .navbar-menu-custom .ant-menu-submenu-title:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+  }
+
+  /* Ensure the label div inside also plays nice */
+  .navbar-menu-custom .ant-menu-title-content > div,
+  .navbar-menu-custom .ant-menu-submenu-title > div {
+    display: flex !important;
+    align-items: center !important;
+    height: 100% !important;
+  }
+
+  /* Hide default Ant Design arrow icon */
+  .navbar-menu-custom .ant-menu-submenu-arrow {
+    display: none !important;
+  }
+
+  /* Submenu Popup Adjustments - Perfect Flush Alignment & Vibration Fix */
+  .ant-menu-submenu-popup {
+    border-radius: 0 !important;
+    padding-top: 2px !important;
+    margin-top: -2px !important;
+    z-index: 1050 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .ant-menu-submenu-popup .ant-menu-sub {
+    border-radius: 2px !important;
+    background-color: var(--card) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+    color: var(--foreground) !important;
+  }
+
+  /* Remove Ant Design's default bottom underline and borders */
+  .navbar-menu-custom.ant-menu-horizontal {
+    border-bottom: none !important;
+  }
+
+  .navbar-menu-custom.ant-menu-horizontal .ant-menu-item::after,
+  .navbar-menu-custom.ant-menu-horizontal .ant-menu-submenu::after {
+    display: none !important;
+  }
+
+  /* Overflow ("More …") popup — cap height so 100+ modules scroll instead
+     of running off-screen. Targets the submenu rendered for the antd
+     horizontal-menu overflow indicator. */
+  .ant-menu-submenu-popup.ant-menu-submenu-popup-placement-bottomLeft
+    > .ant-menu-vertical,
+  .ant-menu-submenu-popup .ant-menu-vertical {
+    max-height: 70vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Support for squared borders as per background request */
+  .base-layout-header {
+    border-radius: 0 !important;
+  }
+
+  /* Mobile Drawer Custom Styles */
+  .mobile-drawer-custom .ant-drawer-content {
+    background-color: var(--card) !important;
+    color: var(--foreground) !important;
+  }
+
+  .mobile-drawer-custom .ant-drawer-header {
+    background-color: var(--card) !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+
+  .mobile-drawer-custom .ant-drawer-title {
+    color: var(--foreground) !important;
+  }
+
+  .mobile-drawer-custom .ant-drawer-close {
+    color: var(--foreground) !important;
+  }
+
+  .mobile-drawer-custom .ant-menu {
+    background: transparent !important;
+    color: var(--foreground) !important;
+    border: none !important;
+  }
+
+  .mobile-drawer-custom .ant-menu-item {
+    border-radius: 0 !important;
+    margin: 4px 0 !important;
+    width: 100% !important;
+  }
+
+  .graph-expanded-table .ant-table-container,
+  .graph-expanded-table .ant-table,
+  .graph-expanded-table .ant-table-content,
+  .graph-expanded-table .ant-table-body,
+  .graph-expanded-table .ant-table-expanded-row,
+  .graph-expanded-table .ant-table-expanded-row-fixed {
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .graph-expanded-table .ant-table-tbody > tr > td,
+  .graph-expanded-table .ant-table-thead > tr > th {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  .graph-expanded-table .ant-table-thead > tr > th {
+    font-weight: 700 !important;
+    color: var(--foreground) !important;
+  }
+
+  .graph-expanded-table .ant-table-tbody > tr,
+  .graph-expanded-table .ant-table-tbody > tr > td,
+  .graph-expanded-table .ant-table-tbody > tr > th {
+    box-shadow: none !important;
+  }
+
+  .graph-card-container,
+  .graph-card-table,
+  .graph-card-table .ant-spin-nested-loading,
+  .graph-card-table .ant-table-container,
+  .graph-card-table .ant-table-content,
+  .graph-expanded-table,
+  .graph-expanded-table .ant-spin-nested-loading,
+  .graph-expanded-table .ant-table-container,
+  .graph-expanded-table .ant-table-content {
+    max-width: 100% !important;
+  }
+
+  .graph-card-table .ant-table-content,
+  .graph-expanded-table .ant-table-content {
+    overflow-x: auto !important;
+  }
+
+  .mobile-drawer-custom .ant-menu-item-selected {
+    background-color: var(--nav-selected-bg) !important;
+    color: var(--nav-selected-color) !important;
+    font-weight: 500 !important;
+  }
+
+  .table-row-alt > td {
+    background: color-mix(in srgb, var(--muted) 35%, transparent) !important;
+  }
+
+  .table-row-alt:hover > td {
+    background: var(--muted) !important;
+  }
+}
+
+/* Custom scrollbar for AntD Table */
+.custom-scroll,
+.custom-scroll *,
+.custom-scroll .ant-table-content,
+.custom-scroll .ant-table-body {
+  scrollbar-width: unset !important;
+  scrollbar-color: unset !important;
+}
+
+/* Step 2: Define the custom scrollbar dimensions */
+.custom-scroll::-webkit-scrollbar,
+.custom-scroll *::-webkit-scrollbar {
+  height: 4px !important;
+  width: 4px !important;
+}
+
+/* Step 3: Transparent track */
+.custom-scroll::-webkit-scrollbar-track,
+.custom-scroll *::-webkit-scrollbar-track {
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+/* Step 4: Sharp rectangular thumb */
+.custom-scroll::-webkit-scrollbar-thumb,
+.custom-scroll *::-webkit-scrollbar-thumb {
+  background: #a1a1a1 !important;
+  border-radius: 0 !important;
+}
+
+/* Step 5: Hover state */
+.custom-scroll::-webkit-scrollbar-thumb:hover,
+.custom-scroll *::-webkit-scrollbar-thumb:hover {
+  background: #888 !important;
+}
+
+/* Step 6: Corner piece (where horizontal and vertical scrollbars meet) */
+.custom-scroll::-webkit-scrollbar-corner,
+.custom-scroll *::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+@keyframes critical-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.critical-blink {
+  animation: critical-blink 1.2s ease-in-out infinite;
+}
+
+/* ─── NOC UTILITIES (shared across the app) ─────────────────── */
+
+/* Mono numerics — terminal-style readability for data dense surfaces. */
+.mx-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Compact uppercase label — used beside values and in panel captions. */
+.mx-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--muted-foreground);
+}
+
+@keyframes mx-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 currentColor;
+  }
+
+  50% {
+    opacity: 0.55;
+    box-shadow: 0 0 8px 2px currentColor;
+  }
+}
+
+.mx-pulse {
+  animation: mx-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes mx-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes mx-scroll {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+.mx-ticker {
+  position: relative;
+  overflow: hidden;
+}
+
+.mx-ticker-track {
+  animation: mx-scroll 60s linear infinite;
+}
+
+.mx-ticker:hover .mx-ticker-track {
+  animation-play-state: paused;
+}
+
+.mx-scan {
+  position: relative;
+}
+
+.mx-scan::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 2px,
+    rgba(255, 255, 255, 0.02) 3px,
+    rgba(255, 255, 255, 0.02) 3px
+  );
+}
+
+.theme-light .mx-scan::after {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 2px,
+    rgba(0, 0, 0, 0.015) 3px,
+    rgba(0, 0, 0, 0.015) 3px
+  );
+}
+
+/* ─── DRAGGABLE CANVAS (free-form widget board) ─────────────── */
+
+.mx-canvas {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.mx-canvas-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(var(--chart-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--chart-grid) 1px, transparent 1px);
+  background-size: 8px 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.mx-canvas.edit-mode .mx-canvas-grid {
+  opacity: 1;
+}
+
+.mx-canvas-widget {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border: 1px solid var(--border);
+  transition: box-shadow 0.12s ease;
+}
+
+.mx-canvas.edit-mode .mx-canvas-widget {
+  cursor: move;
+}
+
+.mx-canvas-widget.selected {
+  border-color: var(--primary);
+  box-shadow:
+    0 0 0 1px var(--primary),
+    0 0 24px color-mix(in srgb, var(--primary) 20%, transparent);
+}
+
+.mx-canvas-widget.dragging {
+  opacity: 0.85;
+  z-index: 100;
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 24px 48px rgba(0, 0, 0, 0.6);
+}
+
+/* Per-widget action buttons (copy / configure / remove) stay hidden until the
+   widget is hovered (or selected) so the canvas reads clean — this holds in
+   both view and edit mode. */
+.mx-canvas-widget [data-noc-action] {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease;
+}
+
+.mx-canvas-widget:hover [data-noc-action],
+.mx-canvas-widget.selected [data-noc-action] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* In edit mode they stay visible at all times, as before. */
+.mx-canvas.edit-mode .mx-canvas-widget [data-noc-action] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mx-canvas-guide {
+  position: absolute;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 200;
+  box-shadow: 0 0 6px var(--accent);
+}
+
+.mx-resize-handle {
+  position: absolute;
+  background: transparent;
+  z-index: 10;
+}
+
+.mx-canvas.edit-mode .mx-resize-handle-n {
+  top: -3px;
+  left: 8px;
+  right: 8px;
+  height: 6px;
+  cursor: ns-resize;
+}
+.mx-canvas.edit-mode .mx-resize-handle-s {
+  bottom: -3px;
+  left: 8px;
+  right: 8px;
+  height: 6px;
+  cursor: ns-resize;
+}
+.mx-canvas.edit-mode .mx-resize-handle-e {
+  top: 8px;
+  right: -3px;
+  bottom: 8px;
+  width: 6px;
+  cursor: ew-resize;
+}
+.mx-canvas.edit-mode .mx-resize-handle-w {
+  top: 8px;
+  left: -3px;
+  bottom: 8px;
+  width: 6px;
+  cursor: ew-resize;
+}
+.mx-canvas.edit-mode .mx-resize-handle-ne {
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+  background: var(--primary);
+}
+.mx-canvas.edit-mode .mx-resize-handle-nw {
+  top: -4px;
+  left: -4px;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+  background: var(--primary);
+}
+.mx-canvas.edit-mode .mx-resize-handle-se {
+  bottom: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+  background: var(--primary);
+}
+.mx-canvas.edit-mode .mx-resize-handle-sw {
+  bottom: -4px;
+  left: -4px;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+  background: var(--primary);
+}
+
+@keyframes mx-widget-focus-pulse {
+  0% {
+    box-shadow:
+      0 0 0 0 color-mix(in srgb, var(--primary) 90%, transparent),
+      0 0 0 0 color-mix(in srgb, var(--primary) 50%, transparent);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 3px color-mix(in srgb, var(--primary) 90%, transparent),
+      0 0 36px 6px color-mix(in srgb, var(--primary) 50%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+    border-color: inherit;
+  }
+}
+
+.mx-widget-focus {
+  animation: mx-widget-focus-pulse 2.4s ease-out 1;
+  border-color: var(--primary) !important;
+  z-index: 50;
+}
+
+/* Increase antd Tabs font size */
+.ant-tabs-tab {
+  font-size: 14px !important;
+}
+
+/* Position antd message toasts to top-right */
+.ant-message {
+  width: auto !important;
+  left: auto !important;
+  right: 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+}
+
+/* react-d3-tree link styles */
+.tree-link {
+  stroke: var(--border, #cbd5e1) !important;
+  stroke-width: 1.5 !important;
+  fill: none !important;
+}
+
+.rd3t-tree-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Hide scrollbar but keep scroll functionality */
+
+/* Flex-based table layout — table fills available space, body scrolls */
+/* .flex-table {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.flex-table .ant-table-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-table .ant-table-wrapper .ant-spin-nested-loading {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-table .ant-table-wrapper .ant-spin-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-table .ant-table-wrapper .ant-table {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-table .ant-table-wrapper .ant-table-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-table .ant-table-wrapper .ant-table-header {
+  flex-shrink: 0;
+}
+
+.flex-table .ant-table-wrapper .ant-table-body {
+  flex: 1 !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+}
+
+.flex-table .ant-table-wrapper .ant-pagination {
+  flex-shrink: 0;
+} */
+
+/* Popover / Popconfirm action buttons — strip the default text-decoration
+   (and its hover/focus variants) so the OK button never paints a thin white
+   underline under its label. Covers both antd's modern `.ant-popover-buttons`
+   row and the legacy `.ant-popconfirm-buttons` row. */
+.ant-popover .ant-btn,
+.ant-popover .ant-btn:hover,
+.ant-popover .ant-btn:focus,
+.ant-popover .ant-btn:focus-visible,
+.ant-popover .ant-btn:active,
+.ant-popover .ant-btn > span,
+.ant-popconfirm .ant-btn,
+.ant-popconfirm .ant-btn:hover,
+.ant-popconfirm .ant-btn:focus,
+.ant-popconfirm .ant-btn:focus-visible,
+.ant-popconfirm .ant-btn:active,
+.ant-popconfirm .ant-btn > span {
+  text-decoration: none !important;
+}
+
+/* ── Multi-select chips + clear/remove affordances ──────────────────────────
+   antd's default selection chips and the clear (×) icon can render with too
+   little contrast on dark surfaces — the selected options "disappear". Pin
+   them to theme CSS vars so they stay legible across every theme. */
+.ant-select-multiple .ant-select-selection-item {
+  background-color: var(--muted) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+.ant-select-multiple .ant-select-selection-item-remove,
+.ant-select-multiple .ant-select-selection-item-remove .anticon,
+.ant-select-multiple .ant-select-selection-item-remove .anticon svg {
+  color: var(--muted-foreground) !important;
+}
+.ant-select-multiple .ant-select-selection-item-remove:hover,
+.ant-select-multiple .ant-select-selection-item-remove:hover .anticon svg {
+  color: var(--foreground) !important;
+}
+.ant-select .ant-select-clear {
+  background-color: var(--input) !important;
+  opacity: 1 !important;
+}
+.ant-select .ant-select-clear,
+.ant-select .ant-select-clear .anticon,
+.ant-select .ant-select-clear .anticon svg {
+  color: var(--text-secondary) !important;
+  fill: currentColor !important;
+}
+.ant-select .ant-select-clear:hover,
+.ant-select .ant-select-clear:hover .anticon,
+.ant-select .ant-select-clear:hover .anticon svg {
+  color: var(--foreground) !important;
+}
+
+/* Input / search clear (×) — same treatment for allowClear inputs. */
+.ant-input-clear-icon,
+.ant-input-clear-icon .anticon,
+.ant-input-clear-icon svg,
+.ant-input-affix-wrapper .ant-input-clear-icon {
+  color: var(--text-secondary) !important;
+  fill: currentColor !important;
+  opacity: 1 !important;
+}
+.ant-input-clear-icon:hover,
+.ant-input-clear-icon:hover svg {
+  color: var(--foreground) !important;
+}

@@ -1,0 +1,103 @@
+/* Dark Theme — NOC palette (unified across the app). */
+.theme-dark {
+  /* Surfaces */
+  --background: #070a11;
+  --foreground: #d9e0ec;
+  --card: #111624;
+  --card-foreground: #d9e0ec;
+  --muted: #161c2d;
+  --muted-foreground: #7d8699;
+  --input: #0d111b;
+  --border: #2e3a55;
+
+  /* Accents */
+  --primary: #4f46e5;
+  --primary-hover: #574fff;
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --secondary: #ec4899;
+  --accent: #f59e0b;
+  --ring: #22d3ee;
+
+  /* Status */
+  /* old color */
+  /* --success: #10b981; */
+  /* new success color by Haris UI */
+  --success: #409f47;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #22d3ee;
+
+  /* Status tag (badge) palette — drives StatusTag variants */
+  --status-primary: #4f46e5; /* = --primary  (enterprise badge bg) */
+  --status-neutral: #2e3a55; /* = --border   (trial badge bg) */
+  --status-on-solid: #ffffff; /* text on solid-color badges */
+  --status-on-basic: #d9e0ec; /* = --foreground (basic badge text) */
+  --status-on-neutral: #7d8699; /* = --muted-foreground (trial badge text) */
+
+  /* Discovery methods — IPAM `discovered_via` tag colors */
+  --via-icmp: #3b82f6;
+  --via-arp: #10b981;
+  --via-dns: #7d8699;
+  --via-snmp: #f59e0b;
+  --via-dhcp: #ec4899;
+  --via-port: #22d3ee;
+  --via-default: #7d8699;
+
+  /* Navbar */
+  --nav-item-color: #7d8699;
+  --nav-selected-bg: #161c2d;
+  --nav-selected-color: #67e8f9;
+  --nav-hover-bg: #161c2d;
+  --nav-background: #0d111b;
+
+  /* Text hierarchy */
+  --text-primary: #d9e0ec;
+  --text-secondary: #aab3c5;
+  --text-tertiary: #7d8699;
+
+  /* Data-viz — bright palette for dark theme */
+  --chart-cyan: #22d3ee;
+  --chart-cyan-bright: #67e8f9;
+  --chart-amber: #f59e0b;
+  --chart-amber-bright: #fbbf24;
+  --chart-magenta: #ec4899;
+  --chart-magenta-bright: #f472b6;
+  --chart-emerald: #10b981;
+  --chart-emerald-bright: #34d399;
+  --chart-red: #ef4444;
+  --chart-red-bright: #f87171;
+  --chart-violet: #a78bfa;
+  --chart-indigo: #818cf8;
+  --chart-grid: #141a28;
+  --chart-label-on-color: #ffffff;
+
+  /* Severity ladder — bright on dark so they pop */
+  --severity-disaster: #ef4444;
+  --severity-high: #fb923c;
+  --severity-average: #f59e0b;
+  --severity-warning: #facc15;
+  --severity-info: #22d3ee;
+
+  /* Health ladder */
+  --health-healthy: #10b981;
+  --health-warning: #f59e0b;
+  --health-critical: #ef4444;
+  --health-unknown: #4a5162;
+  --health-maintenance: #a78bfa;
+
+  /* Fonts — mono stack for numerics, sans for everything else */
+  --font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'Fira Code', 'SF Mono',
+    'Menlo', ui-monospace, monospace;
+  --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+  /* Terminal — always dark regardless of app theme */
+  --terminal-bg: #0b0f14;
+  --terminal-fg: #22d3ee;
+  --terminal-text: #d4d4d4;
+  --terminal-muted: #6b7280;
+  --terminal-cursor: #22d3ee;
+  --terminal-selection: #22d3ee44;
+
+  color-scheme: dark;
+}
