@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App.jsx';
 import ThemeProvider from './theme';
 import { AuthProvider } from './context/AuthContext';
+import { ActiveSchoolProvider } from './context/ActiveSchoolContext';
 import './index.css';
 
 const queryClient = new QueryClient();
@@ -15,7 +16,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <ThemeProvider>
           <AuthProvider>
-            <App />
+            <ActiveSchoolProvider>
+              <App />
+            </ActiveSchoolProvider>
           </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>

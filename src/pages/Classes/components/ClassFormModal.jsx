@@ -1,12 +1,12 @@
 import React, { useEffect } from 'react';
-import { Form, Input, Modal, Select, notification } from 'antd';
-import { useAuth } from '../../../context/AuthContext';
-import { useSchools } from '../../../hooks/useSchools';
+import { Col, Form, Input, Modal, Row, Select, notification } from 'antd';
+import { useActiveSchool } from '../../../context/ActiveSchoolContext';
 import { useCreateClass, useUpdateClass } from '../../../hooks/useClasses';
+import { useAllTeachers } from '../../../hooks/useTeachers';
 
 /**
- * Create / edit a class. School selection is shown only to superadmins on
- * create — school-bound users have their school enforced server-side.
+ * Create / edit a class in the active school (top-bar switcher); the server
+ * re-validates that the user may write to that school.
  *
  * @param {{
  *   open: boolean,
@@ -17,17 +17,31 @@ import { useCreateClass, useUpdateClass } from '../../../hooks/useClasses';
  */
 export default function ClassFormModal({ open, onClose, editData, onSuccess }) {
   const [form] = Form.useForm();
-  const { user } = useAuth();
-  const isSuperuser = user?.is_superuser === true;
+  const { activeSchoolId } = useActiveSchool();
   const isEdit = !!editData;
 
   const createMutation = useCreateClass();
   const updateMutation = useUpdateClass();
 
-  // Superadmins choose a school when creating (they aren't bound to one).
-  const { data: schools = [] } = useSchools({
-    enabled: isSuperuser && !isEdit,
-  });
+  // Class teacher options: active teachers of the active school.
+  const { data: teachers = [], isLoading: teachersLoading } = useAllTeachers(
+    { status: 'Active' },
+    { enabled: open }
+  );
+  const teacherOptions = teachers.map((t) => ({
+    value: t.id,
+    label: t.employee_code ? `${t.name} (${t.employee_code})` : t.name,
+  }));
+  // Keep the current class teacher selectable even if no longer Active.
+  if (
+    editData?.class_teacher_id &&
+    !teacherOptions.some((o) => o.value === editData.class_teacher_id)
+  ) {
+    teacherOptions.unshift({
+      value: editData.class_teacher_id,
+      label: editData.class_teacher_name ?? `#${editData.class_teacher_id}`,
+    });
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -35,17 +49,12 @@ export default function ClassFormModal({ open, onClose, editData, onSuccess }) {
       form.setFieldsValue({
         class_name: editData.class_name,
         section: editData.section ?? '',
-        school_id: editData.school_id,
+        class_teacher_id: editData.class_teacher_id ?? undefined,
       });
     } else {
       form.resetFields();
     }
   }, [open, editData, form]);
-
-  const resolveSchoolId = (values) => {
-    if (!isSuperuser) return user?.school_id ?? null;
-    return values.school_id ?? editData?.school_id ?? null;
-  };
 
   const handleOk = async () => {
     let values;
@@ -56,26 +65,25 @@ export default function ClassFormModal({ open, onClose, editData, onSuccess }) {
     }
 
     const section = values.section?.trim() || null;
+    const classTeacherId = values.class_teacher_id ?? null;
 
     try {
       if (isEdit) {
         await updateMutation.mutateAsync({
           id: editData.id,
-          payload: { class_name: values.class_name.trim(), section },
+          payload: {
+            class_name: values.class_name.trim(),
+            section,
+            class_teacher_id: classTeacherId,
+          },
         });
         notification.success({ message: 'Class updated successfully.' });
       } else {
-        const schoolId = resolveSchoolId(values);
-        if (schoolId == null) {
-          notification.error({
-            message: 'A school is required to create a class.',
-          });
-          return;
-        }
         await createMutation.mutateAsync({
-          school_id: schoolId,
+          school_id: activeSchoolId,
           class_name: values.class_name.trim(),
           section,
+          class_teacher_id: classTeacherId,
         });
         notification.success({ message: 'Class created successfully.' });
       }
@@ -99,36 +107,42 @@ export default function ClassFormModal({ open, onClose, editData, onSuccess }) {
       confirmLoading={createMutation.isPending || updateMutation.isPending}
       destroyOnHidden
     >
-      <Form form={form} layout="vertical" className="pt-2">
-        {isSuperuser && !isEdit && (
-          <Form.Item
-            name="school_id"
-            label="School"
-            rules={[{ required: true, message: 'Please select a school' }]}
-          >
-            <Select
-              placeholder="Select a school"
-              showSearch
-              optionFilterProp="label"
-              options={schools.map((s) => ({ value: s.id, label: s.name }))}
-            />
-          </Form.Item>
-        )}
+      <Form form={form} layout="vertical">
+        <Row gutter={16}>
+          <Col xs={24} sm={14}>
+            <Form.Item
+              name="class_name"
+              label="Class Name"
+              rules={[{ required: true, message: 'Please enter a class name' }]}
+            >
+              <Input placeholder="e.g. Grade 10" maxLength={100} />
+            </Form.Item>
+          </Col>
+          <Col xs={24} sm={10}>
+            <Form.Item
+              name="section"
+              label="Section"
+              tooltip="Optional — e.g. A, B, Blue"
+            >
+              <Input placeholder="e.g. A" maxLength={50} allowClear />
+            </Form.Item>
+          </Col>
+        </Row>
 
         <Form.Item
-          name="class_name"
-          label="Class Name"
-          rules={[{ required: true, message: 'Please enter a class name' }]}
+          name="class_teacher_id"
+          label="Class Teacher"
+          tooltip="The teacher responsible for this class. Manage teachers in the Teachers module."
         >
-          <Input placeholder="e.g. Grade 10" maxLength={100} />
-        </Form.Item>
-
-        <Form.Item
-          name="section"
-          label="Section"
-          tooltip="Optional — e.g. A, B, Blue"
-        >
-          <Input placeholder="e.g. A" maxLength={50} allowClear />
+          <Select
+            allowClear
+            showSearch
+            optionFilterProp="label"
+            placeholder="Select a teacher"
+            loading={teachersLoading}
+            options={teacherOptions}
+            notFoundContent="No active teachers in this school"
+          />
         </Form.Item>
       </Form>
     </Modal>

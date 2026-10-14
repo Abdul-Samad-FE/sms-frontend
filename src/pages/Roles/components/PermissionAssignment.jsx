@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { Checkbox, Empty } from 'antd';
+import { Checkbox } from 'antd';
+import { TableEmpty } from '../../../components/ui';
 
 /**
  * @typedef {import('../../../api/admin').PermissionRecord} PermissionRecord
@@ -49,11 +50,11 @@ export default function PermissionAssignment({
   };
 
   if (!permissions.length) {
-    return <Empty description="No permissions available." />;
+    return <TableEmpty text="No permissions available." />;
   }
 
   return (
-    <div className="flex flex-col gap-4 max-h-[45vh] overflow-y-auto pr-1">
+    <div className="flex max-h-[50vh] flex-col gap-3 overflow-y-auto pr-1">
       {groups.map(([moduleName, groupPerms]) => {
         const selectedCount = groupPerms.filter((p) =>
           selected.has(p.id)
@@ -61,25 +62,25 @@ export default function PermissionAssignment({
         const allChecked = selectedCount === groupPerms.length;
         const indeterminate = selectedCount > 0 && !allChecked;
         return (
-          <div
+          <fieldset
             key={moduleName}
-            className="border border-[var(--border)] rounded-lg p-3"
+            className="m-0 rounded-[var(--radius)] border border-[var(--border)]"
           >
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--border-subtle)] bg-[var(--header-bg)] px-4 py-2.5">
               <Checkbox
                 checked={allChecked}
                 indeterminate={indeterminate}
                 onChange={(e) => toggleGroup(groupPerms, e.target.checked)}
               >
-                <span className="font-semibold capitalize text-[var(--foreground)]">
+                <span className="ds-section-title text-[14px] capitalize">
                   {moduleName}
                 </span>
               </Checkbox>
-              <span className="text-[11px] text-[var(--muted-foreground)]">
+              <span className="ds-caption">
                 {selectedCount}/{groupPerms.length}
               </span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 pl-6">
+            <div className="grid grid-cols-1 gap-x-4 gap-y-2 px-4 py-3 sm:grid-cols-2">
               {groupPerms.map((p) => (
                 <Checkbox
                   key={p.id}
@@ -90,7 +91,7 @@ export default function PermissionAssignment({
                 </Checkbox>
               ))}
             </div>
-          </div>
+          </fieldset>
         );
       })}
     </div>

@@ -1,21 +1,44 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { createRole, deleteRole, listRoles, updateRole } from '../api/admin';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
+import {
+  createRole,
+  deleteRole,
+  listAllRoles,
+  listRoles,
+  updateRole,
+} from '../api/admin';
 
 export const roleKeys = {
   all: ['roles'],
   list: () => ['roles', 'list'],
+  page: (params) => ['roles', 'page', params],
 };
 
 /**
- * React Query hook for roles (each includes its permissions + modules).
+ * Every role as an array (each with its permissions + modules) — for role
+ * pickers such as the user form.
  *
  * @param {import('@tanstack/react-query').UseQueryOptions} [options]
  */
 export function useRoles(options = {}) {
   return useQuery({
     queryKey: roleKeys.list(),
-    queryFn: listRoles,
+    queryFn: listAllRoles,
     staleTime: 5 * 60_000,
+    ...options,
+  });
+}
+
+/** One server page of roles for the roles table. */
+export function useRolesPage(params, options = {}) {
+  return useQuery({
+    queryKey: roleKeys.page(params),
+    queryFn: () => listRoles(params),
+    placeholderData: keepPreviousData,
     ...options,
   });
 }

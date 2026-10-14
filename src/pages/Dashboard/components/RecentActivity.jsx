@@ -1,7 +1,17 @@
 import React from 'react';
-import { Table, Tag, Empty } from 'antd';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { useAuth } from '../../../context/AuthContext';
+import { useAuditLogs } from '../../../hooks/useAuditLogs';
+import { usePagination } from '../../../hooks/usePagination';
+import {
+  ContentCard,
+  DataTable,
+  EmptyCell,
+  MutedCell,
+  StatusTag,
+  TextCell,
+} from '../../../components/ui';
 
 dayjs.extend(relativeTime);
 
@@ -9,14 +19,14 @@ dayjs.extend(relativeTime);
  * @typedef {import('../../../api/dashboard').RecentActivityItem} RecentActivityItem
  */
 
-/** Colour an activity row by the verb in its action string. */
-const ACTION_COLORS = {
-  create: 'green',
-  update: 'blue',
-  delete: 'red',
-  login: 'default',
-  logout: 'default',
-  sign_up: 'cyan',
+/** Tone an activity row by the verb in its action string. */
+const ACTION_TONES = {
+  create: 'success',
+  update: 'info',
+  delete: 'danger',
+  sign: 'accent',
+  login: 'neutral',
+  logout: 'neutral',
 };
 
 /** "create_student" -> "Create Student" */
@@ -25,9 +35,9 @@ const humanize = (value) =>
     .replace(/_/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase());
 
-const actionColor = (action) => {
+const actionTone = (action) => {
   const verb = String(action || '').split('_')[0];
-  return ACTION_COLORS[verb] ?? 'default';
+  return ACTION_TONES[verb] ?? 'neutral';
 };
 
 /**
@@ -36,15 +46,21 @@ const actionColor = (action) => {
  * @param {{ items?: RecentActivityItem[], loading?: boolean }} props
  */
 export default function RecentActivity({ items = [], loading = false }) {
+  // Users who may read the audit trail page through it server-side; everyone
+  // else sees the short feed that ships with the dashboard payload.
+  const { hasPermission } = useAuth();
+  const canBrowseAudit = hasPermission('audit:read');
+  const paging = usePagination({ initialPageSize: 5 });
+  const auditQuery = useAuditLogs(paging.params, { enabled: canBrowseAudit });
+  const rows = canBrowseAudit ? (auditQuery.data?.items ?? []) : items;
+
   const columns = [
     {
       title: 'Action',
       dataIndex: 'action',
       key: 'action',
       render: (action) => (
-        <Tag color={actionColor(action)} className="border-0 font-medium">
-          {humanize(action)}
-        </Tag>
+        <StatusTag tone={actionTone(action)}>{humanize(action)}</StatusTag>
       ),
     },
     {
@@ -53,26 +69,21 @@ export default function RecentActivity({ items = [], loading = false }) {
       key: 'entity',
       render: (entity, record) =>
         entity ? (
-          <span className="text-[var(--foreground)]">
+          <span>
             {humanize(entity)}
             {record.entity_id != null && (
-              <span className="text-[var(--muted-foreground)]">
-                {' '}
-                #{record.entity_id}
-              </span>
+              <span className="ds-cell-muted"> #{record.entity_id}</span>
             )}
           </span>
         ) : (
-          <span className="text-[var(--muted-foreground)]">—</span>
+          <EmptyCell />
         ),
     },
     {
       title: 'By',
       dataIndex: 'user_name',
       key: 'user_name',
-      render: (name) => (
-        <span className="text-[var(--foreground)]">{name || 'System'}</span>
-      ),
+      render: (name) => <TextCell>{name || 'System'}</TextCell>,
     },
     {
       title: 'When',
@@ -80,43 +91,33 @@ export default function RecentActivity({ items = [], loading = false }) {
       key: 'created_at',
       render: (ts) =>
         ts ? (
-          <span
-            className="text-[var(--muted-foreground)] text-sm"
-            title={dayjs(ts).format('YYYY-MM-DD HH:mm:ss')}
-          >
-            {dayjs(ts).fromNow()}
+          <span title={dayjs(ts).format('YYYY-MM-DD HH:mm:ss')}>
+            <MutedCell>{dayjs(ts).fromNow()}</MutedCell>
           </span>
         ) : (
-          '—'
+          <EmptyCell />
         ),
     },
   ];
 
   return (
-    <div className="card-glass p-0 overflow-hidden outline-none border-[var(--card-border)] shadow-sm">
-      <div className="p-4 border-b border-[var(--border)] flex justify-between items-center header-glass">
-        <h3 className="text-lg font-semibold m-0 text-[var(--foreground)]">
-          Recent Activity
-        </h3>
-      </div>
-      <div className="ai-reports-table">
-        <Table
-          columns={columns}
-          dataSource={items}
-          rowKey="id"
-          loading={loading}
-          pagination={{ pageSize: 5, hideOnSinglePage: true }}
-          scroll={{ x: 'max-content' }}
-          locale={{
-            emptyText: (
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description="No recent activity yet"
-              />
-            ),
-          }}
-        />
-      </div>
-    </div>
+    <ContentCard
+      title="Recent Activity"
+      subtitle="Latest actions recorded in the audit trail"
+      flush
+      className="h-full"
+    >
+      <DataTable
+        columns={columns}
+        dataSource={rows}
+        loading={canBrowseAudit ? auditQuery.isFetching : loading}
+        pagination={
+          canBrowseAudit
+            ? paging.tableProps(auditQuery.data?.meta)
+            : { pageSize: 5 }
+        }
+        emptyText="No recent activity yet"
+      />
+    </ContentCard>
   );
 }

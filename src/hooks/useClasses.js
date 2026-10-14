@@ -1,9 +1,15 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import {
   createClass,
   deleteClass,
   getClass,
-  listClasses,
+  listAllClasses,
+  listClassesPage,
   updateClass,
 } from '../api/classes';
 
@@ -11,21 +17,41 @@ export const classKeys = {
   all: ['classes'],
   /** @param {Record<string, unknown>} [params] */
   list: (params = {}) => ['classes', 'list', params],
+  /** @param {Record<string, unknown>} [params] */
+  page: (params = {}) => ['classes', 'page', params],
   /** @param {number} id */
   detail: (id) => ['classes', 'detail', id],
 };
 
 /**
- * React Query hook for the (tenant-scoped) class list.
+ * Every class in scope as an array — for pickers and filters.
  *
  * @param {Record<string, unknown>} [params]
  * @param {import('@tanstack/react-query').UseQueryOptions} [options]
  */
-export function useClasses(params = {}, options = {}) {
+export function useAllClasses(params = {}, options = {}) {
   return useQuery({
     queryKey: classKeys.list(params),
-    queryFn: () => listClasses(params),
+    queryFn: () => listAllClasses(params),
     staleTime: 5 * 60_000, // class lists change rarely
+    ...options,
+  });
+}
+
+/** @deprecated Alias of `useAllClasses`; tables should use `useClassesPage`. */
+export const useClasses = useAllClasses;
+
+/**
+ * One server page of classes (`{ items, meta }`) for paginated tables.
+ *
+ * @param {{ page?: number, page_size?: number, search?: string }} [params]
+ * @param {import('@tanstack/react-query').UseQueryOptions} [options]
+ */
+export function useClassesPage(params = {}, options = {}) {
+  return useQuery({
+    queryKey: classKeys.page(params),
+    queryFn: () => listClassesPage(params),
+    placeholderData: keepPreviousData,
     ...options,
   });
 }
@@ -77,4 +103,4 @@ export function useDeleteClass() {
   });
 }
 
-export default useClasses;
+export default useAllClasses;

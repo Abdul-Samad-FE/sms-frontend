@@ -1,5 +1,6 @@
 import React from 'react';
-import { Checkbox, Empty } from 'antd';
+import { Checkbox } from 'antd';
+import { TableEmpty } from '../../../components/ui';
 
 /**
  * @typedef {import('../../../api/admin').ModuleRecord} ModuleRecord
@@ -20,18 +21,29 @@ export default function ModuleAssignment({
   onChange,
 }) {
   if (!modules.length) {
-    return <Empty description="No modules available." />;
+    return <TableEmpty text="No modules available." />;
   }
 
   return (
-    <Checkbox.Group value={value} onChange={onChange} className="w-full">
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        {modules.map((m) => (
-          <Checkbox key={m.id} value={m.id}>
-            {m.display_name}
-          </Checkbox>
-        ))}
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <span className="ds-label">Sidebar modules</span>
+        <span className="ds-caption">
+          {value.length}/{modules.length} selected
+        </span>
       </div>
-    </Checkbox.Group>
+      <Checkbox.Group value={value} onChange={onChange} className="w-full">
+        <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+          {modules.map((m) => (
+            <div
+              key={m.id}
+              className="rounded-[var(--radius)] border border-[var(--border)] px-3 py-2"
+            >
+              <Checkbox value={m.id}>{m.display_name}</Checkbox>
+            </div>
+          ))}
+        </div>
+      </Checkbox.Group>
+    </div>
   );
 }

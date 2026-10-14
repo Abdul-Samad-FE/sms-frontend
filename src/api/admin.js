@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { MAX_PAGE_SIZE } from './pagination';
 
 /**
  * @typedef {Object} PermissionRecord
@@ -39,9 +40,28 @@ import apiClient from './client';
  * @property {number[]} [module_ids]
  */
 
-/** @returns {Promise<RoleRecord[]>} */
-export async function listRoles() {
-  const { data } = await apiClient.get('/admin/roles');
+/**
+ * One page of roles (with permissions + modules).
+ * @param {{ page?: number, page_size?: number }} [params]
+ * @returns {Promise<import('./pagination').Page<RoleRecord>>}
+ */
+export async function listRoles(params = {}) {
+  const { data } = await apiClient.get('/admin/roles', { params });
+  return data;
+}
+
+/** Every role (for role pickers). @returns {Promise<RoleRecord[]>} */
+export async function listAllRoles() {
+  const page = await listRoles({ page: 1, page_size: MAX_PAGE_SIZE });
+  return page.items;
+}
+
+/**
+ * One page of audit-log entries, newest first (school admins: own school).
+ * @param {{ page?: number, page_size?: number, user_id?: number, action?: string, entity?: string }} [params]
+ */
+export async function listAuditLogs(params = {}) {
+  const { data } = await apiClient.get('/admin/audit-logs', { params });
   return data;
 }
 

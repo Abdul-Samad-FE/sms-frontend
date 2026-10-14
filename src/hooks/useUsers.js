@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { createUser, deleteUser, listUsers, updateUser } from '../api/users';
 
 export const userKeys = {
@@ -8,15 +13,17 @@ export const userKeys = {
 };
 
 /**
- * React Query hook for the (tenant-scoped) user list.
+ * One server-side page of the (tenant-scoped) user list — `{ items, meta }`.
+ * Keeps the previous page on screen while the next one loads.
  *
- * @param {{ school_id?: number, skip?: number, limit?: number }} [params]
+ * @param {Parameters<typeof listUsers>[0]} [params]
  * @param {import('@tanstack/react-query').UseQueryOptions} [options]
  */
 export function useUsers(params = {}, options = {}) {
   return useQuery({
     queryKey: userKeys.list(params),
     queryFn: () => listUsers(params),
+    placeholderData: keepPreviousData,
     staleTime: 60_000,
     ...options,
   });

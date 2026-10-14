@@ -100,5 +100,16 @@
   --terminal-cursor: #22d3ee;
   --terminal-selection: #22d3ee44;
 
+  /* ── Layout & shape (shared design-system scale) ── */
+  --radius-sm: 6px; /* inputs, buttons, tags */
+  --radius: 8px; /* small panels, list items */
+  --radius-lg: 12px; /* cards, tables, modals */
+  --card-border: var(--border);
+  --border-subtle: #222b40; /* row dividers inside cards */
+  --header-bg: color-mix(in srgb, var(--muted) 70%, var(--card));
+  --background-overlay: transparent;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 6px 16px -4px rgb(0 0 0 / 0.45);
+
   color-scheme: dark;
 }

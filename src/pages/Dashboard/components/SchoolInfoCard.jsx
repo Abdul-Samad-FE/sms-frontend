@@ -1,9 +1,21 @@
 import React from 'react';
-import { Descriptions, Tag } from 'antd';
+import { ContentCard, MonoCell, StatusTag } from '../../../components/ui';
 
 /**
  * @typedef {import('../../../api/dashboard').DashboardSchoolInfo} DashboardSchoolInfo
  */
+
+/** One label/value row of the info list. */
+function InfoRow({ label, children }) {
+  return (
+    <div className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0 border-b border-[var(--border-subtle)] last:border-b-0">
+      <dt className="ds-label">{label}</dt>
+      <dd className="m-0 text-sm text-[var(--foreground)] break-words">
+        {children || <span className="ds-cell-empty">—</span>}
+      </dd>
+    </div>
+  );
+}
 
 /**
  * School identity panel. Renders the tenant's details, or a "global view"
@@ -13,34 +25,25 @@ import { Descriptions, Tag } from 'antd';
  */
 export default function SchoolInfoCard({ school }) {
   return (
-    <div className="card-glass p-0 overflow-hidden outline-none border-[var(--card-border)] shadow-sm h-full">
-      <div className="p-4 border-b border-[var(--border)] flex justify-between items-center header-glass">
-        <h3 className="text-lg font-semibold m-0 text-[var(--foreground)]">
-          School Information
-        </h3>
-        {!school && <Tag color="purple">Global view</Tag>}
-      </div>
-
-      <div className="p-4">
-        {school ? (
-          <Descriptions column={1} size="small" colon>
-            <Descriptions.Item label="Name">{school.name}</Descriptions.Item>
-            <Descriptions.Item label="EMIS Code">
-              <span className="font-mono">{school.emis_code}</span>
-            </Descriptions.Item>
-            <Descriptions.Item label="Union Council">
-              {school.uc_name}
-            </Descriptions.Item>
-            <Descriptions.Item label="Address">
-              {school.address || '—'}
-            </Descriptions.Item>
-          </Descriptions>
-        ) : (
-          <p className="text-[var(--muted-foreground)] text-sm m-0">
-            You are viewing aggregated statistics across all schools.
-          </p>
-        )}
-      </div>
-    </div>
+    <ContentCard
+      title="School Information"
+      extra={!school && <StatusTag tone="accent">Global view</StatusTag>}
+      className="h-full"
+    >
+      {school ? (
+        <dl className="m-0">
+          <InfoRow label="Name">{school.name}</InfoRow>
+          <InfoRow label="EMIS Code">
+            <MonoCell>{school.emis_code}</MonoCell>
+          </InfoRow>
+          <InfoRow label="Union Council">{school.uc_name}</InfoRow>
+          <InfoRow label="Address">{school.address}</InfoRow>
+        </dl>
+      ) : (
+        <p className="ds-caption m-0 text-sm">
+          You are viewing aggregated statistics across all schools.
+        </p>
+      )}
+    </ContentCard>
   );
 }

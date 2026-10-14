@@ -4,7 +4,14 @@ import SummaryCards from './components/SummaryCards';
 import RecentActivity from './components/RecentActivity';
 import SchoolInfoCard from './components/SchoolInfoCard';
 import { useDashboardStats } from '../../hooks/useDashboardStats';
-import { useTheme } from '../../theme';
+import { useAuth } from '../../context/AuthContext';
+import { useActiveSchool } from '../../context/ActiveSchoolContext';
+import {
+  PageContainer,
+  PageHeader,
+  StatGrid,
+  StatusTag,
+} from '../../components/ui';
 
 /**
  * Map the API stats payload to the shape `SummaryCards` already expects,
@@ -20,7 +27,6 @@ const toSummary = (stats) => ({
 });
 
 export default function Dashboard() {
-  const { toggleTheme } = useTheme();
   const {
     data: stats,
     isLoading,
@@ -29,63 +35,62 @@ export default function Dashboard() {
     refetch,
     isFetching,
   } = useDashboardStats();
+  const { isGlobal, organization, user } = useAuth();
+  const { activeSchoolId, activeSchool } = useActiveSchool();
+
+  // Which tenant slice the numbers below describe.
+  const scopeLabel =
+    activeSchoolId == null
+      ? isGlobal
+        ? 'All schools on the platform'
+        : `All schools in ${organization?.name ?? 'your organization'}`
+      : (activeSchool?.name ??
+        stats?.school?.name ??
+        user?.school_name ??
+        'Your school');
 
   const lastUpdated = stats?.generated_at ? new Date(stats.generated_at) : null;
 
   return (
-    <div className="flex flex-col gap-6 p-6 min-h-screen">
-      {/* Header */}
-      <div className="flex items-center justify-between px-2">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-3 text-[var(--foreground)]">
-            SMS Overview Dashboard
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <p className="text-[10px] text-[var(--muted-foreground)] font-mono mt-1 hidden sm:block">
-            SYSTEM STATUS:{' '}
-            <span className="text-[var(--success)] font-bold">OPERATIONAL</span>
+    <PageContainer>
+      <PageHeader
+        title="Dashboard"
+        subtitle={`${scopeLabel} · students, classes and today's attendance.`}
+        actions={
+          <div className="flex items-center gap-3">
+            <StatusTag tone="success">Operational</StatusTag>
             {lastUpdated && (
-              <> · LAST UPDATED: {lastUpdated.toLocaleTimeString()}</>
+              <span className="ds-caption">
+                Updated {lastUpdated.toLocaleTimeString()}
+              </span>
             )}
-          </p>
-          <button
-            onClick={toggleTheme}
-            className="border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] px-4 py-1.5 rounded-md text-sm font-medium cursor-pointer hover:bg-[var(--muted)] transition-colors shadow-sm"
-          >
-            Toggle Theme
-          </button>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
-      {/* Error state */}
       {isError && (
-        <div className="px-2">
-          <Alert
-            type="error"
-            showIcon
-            message="Failed to load dashboard"
-            description={
-              error?.response?.data?.detail ||
-              error?.message ||
-              'An unexpected error occurred while loading dashboard data.'
-            }
-            action={
-              <Button size="small" danger onClick={() => refetch()}>
-                Retry
-              </Button>
-            }
-          />
-        </div>
+        <Alert
+          type="error"
+          showIcon
+          title="Failed to load dashboard"
+          description={
+            error?.response?.data?.detail ||
+            error?.message ||
+            'An unexpected error occurred while loading dashboard data.'
+          }
+          action={
+            <Button size="small" danger onClick={() => refetch()}>
+              Retry
+            </Button>
+          }
+        />
       )}
 
-      {/* Loading state */}
       {isLoading ? (
-        <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 px-2">
+        <>
+          <StatGrid columns={4}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="card-glass">
+              <div key={i} className="ds-card p-5">
                 <Skeleton
                   active
                   paragraph={{ rows: 1 }}
@@ -93,21 +98,17 @@ export default function Dashboard() {
                 />
               </div>
             ))}
+          </StatGrid>
+          <div className="ds-card p-5">
+            <Skeleton active paragraph={{ rows: 6 }} />
           </div>
-          <div className="px-2">
-            <div className="card-glass">
-              <Skeleton active paragraph={{ rows: 6 }} />
-            </div>
-          </div>
-        </div>
+        </>
       ) : (
         !isError && (
           <>
-            {/* Row 1: Summary Cards */}
             <SummaryCards summary={toSummary(stats)} />
 
-            {/* Row 2: School info + Recent activity */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 px-2">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
               <div className="min-w-0 xl:col-span-1">
                 <SchoolInfoCard school={stats?.school} />
               </div>
@@ -121,6 +122,6 @@ export default function Dashboard() {
           </>
         )
       )}
-    </div>
+    </PageContainer>
   );
 }

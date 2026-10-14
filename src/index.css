@@ -12,22 +12,21 @@
     width: 10px;
   }
 
-  /* Track */
+  /* Track — theme-aware so the scrollbar never flashes light on dark. */
   ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--background);
   }
 
   /* Handle */
   ::-webkit-scrollbar-thumb {
-    background: #a1a1a1;
-    height: 250px;
-    border-radius: 0 !important;
-    box-shadow: inset 0 0 0 10px #a1a1a1 !important;
+    background: var(--border);
+    border-radius: 999px;
+    border: 2px solid var(--background);
   }
 
   /* Handle on hover */
   ::-webkit-scrollbar-thumb:hover {
-    background: #888;
+    background: var(--muted-foreground);
   }
   body {
     background-color: var(--background);
@@ -76,8 +75,8 @@
     background-color: var(--card);
     border-color: var(--border);
     color: var(--card-foreground);
-    border-radius: 0.5rem;
-    padding: 1rem;
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
     border-width: 1px;
   }
 
@@ -87,19 +86,10 @@
   .card-glass {
     background-color: var(--card);
     border: 1px solid var(--border);
-    border-radius: 0.5rem;
-    padding: 1rem;
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
     color: var(--card-foreground);
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease;
-  }
-
-  /* Stat cards lift slightly on hover for a touch of polish. */
-  .card-glass:hover {
-    border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
-    box-shadow: 0 2px 8px 0 rgb(0 0 0 / 0.08);
+    box-shadow: var(--shadow-sm);
   }
 
   .header-glass {
@@ -110,8 +100,8 @@
     background-color: var(--card);
     border-color: var(--border);
     color: var(--card-foreground);
-    padding: 0.75rem;
-    border-radius: 0.375rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius);
     border-width: 1px;
     transition: background-color 0.2s;
   }
@@ -716,11 +706,6 @@
   z-index: 50;
 }
 
-/* Increase antd Tabs font size */
-.ant-tabs-tab {
-  font-size: 14px !important;
-}
-
 /* Position antd message toasts to top-right */
 .ant-message {
   width: auto !important;
@@ -867,4 +852,237 @@
 .ant-input-clear-icon:hover,
 .ant-input-clear-icon:hover svg {
   color: var(--foreground) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — shared typography + surface rules used by
+   `src/components/ui`. Kept unlayered so they win over antd's
+   CSS-in-JS. Every colour comes from a theme variable.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Typography scale ──────────────────────────────────────────────────
+   Page title 22/600 · section title 15/600 · body 14 · table 13 ·
+   label 12/600 · caption 12 muted. */
+.ds-page-title {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--foreground);
+}
+.ds-page-subtitle {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+.ds-section-title {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--foreground);
+}
+.ds-section-subtitle {
+  margin: 2px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+.ds-label {
+  font-size: 12px;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+.ds-caption {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted-foreground);
+}
+
+/* ── Content card ─────────────────────────────────────────────────────── */
+.ds-card {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+  overflow: hidden;
+}
+.ds-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.ds-card-body {
+  padding: 20px;
+}
+/* Tables sit flush in the card; the card supplies the outer frame. */
+.ds-card-body--flush {
+  padding: 0;
+}
+
+/* ── Data table ───────────────────────────────────────────────────────── */
+.data-table .ant-table,
+.data-table .ant-table-container {
+  background: transparent;
+  border-radius: 0 !important;
+}
+.data-table .ant-table-thead > tr > th,
+.data-table .ant-table-thead > tr > td {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  color: var(--muted-foreground) !important;
+  background: var(--header-bg) !important;
+  border-bottom: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  white-space: nowrap;
+}
+.data-table .ant-table-thead > tr > th::before {
+  display: none;
+}
+.data-table .ant-table-tbody > tr > td {
+  font-size: 13px;
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border-subtle) !important;
+  vertical-align: middle;
+}
+.data-table .ant-table-tbody > tr:last-child > td {
+  border-bottom: none !important;
+}
+.data-table .ant-table-pagination.ant-pagination {
+  margin: 0 !important;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+/* A table placed straight on the page (not inside a card) frames itself. */
+.data-table--framed {
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Table cells — one style per semantic kind (see ui/TableCells.jsx). */
+.ds-cell-primary {
+  font-weight: 600;
+  color: var(--foreground);
+}
+.ds-cell-secondary {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+.ds-cell-muted {
+  color: var(--muted-foreground);
+}
+.ds-cell-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 12.5px;
+}
+.ds-cell-empty {
+  color: var(--muted-foreground);
+  opacity: 0.7;
+}
+
+/* ── Status tag ───────────────────────────────────────────────────────── */
+.ds-status-tag.ant-tag {
+  margin: 0;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 22px;
+  border: 1px solid color-mix(in srgb, var(--ds-tone) 35%, transparent);
+  background: color-mix(in srgb, var(--ds-tone) 12%, transparent);
+  color: var(--ds-tone);
+}
+
+/* ── Stat card ────────────────────────────────────────────────────────── */
+.ds-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  color: var(--ds-tone);
+  background: color-mix(in srgb, var(--ds-tone) 12%, transparent);
+}
+
+/* ── Modals ───────────────────────────────────────────────────────────── */
+.ant-modal:not(.ant-modal-confirm) .ant-modal-header {
+  margin: -20px -24px 20px !important;
+  padding: 16px 56px 16px 24px !important;
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.ant-modal .ant-modal-title {
+  font-weight: 600 !important;
+}
+.ant-modal .ant-modal-close {
+  top: 14px !important;
+  inset-inline-end: 16px !important;
+}
+.ant-modal:not(.ant-modal-confirm) .ant-modal-footer {
+  margin: 24px -24px -20px !important;
+  padding: 14px 24px !important;
+  border-top: 1px solid var(--border-subtle);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.ant-modal .ant-modal-footer .ant-btn + .ant-btn {
+  margin-inline-start: 8px;
+}
+/* Custom in-body footers (modals with footer={null}) use this row. */
+.ds-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin: 24px -24px -20px;
+  padding: 14px 24px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ── Forms: consistent vertical rhythm and label weight ───────────────── */
+.ant-form-vertical .ant-form-item-label > label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* ── Row action buttons ───────────────────────────────────────────────── */
+.ds-table-actions {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+}
+/* Row actions share one quiet outlined look; danger keeps its red text. */
+.ds-table-actions .ant-btn-variant-outlined,
+.ds-table-actions .ant-btn-default {
+  background: var(--card);
+}
+.ds-table-actions
+  .ant-btn-default:not(:disabled):not(.ant-btn-dangerous):hover {
+  background: var(--muted);
+}
+/* Disabled row actions stay legible in both themes. */
+.ds-table-actions .ant-btn:disabled {
+  color: var(--muted-foreground) !important;
+  border-color: var(--border) !important;
+  background: transparent !important;
+  opacity: 0.65;
 }

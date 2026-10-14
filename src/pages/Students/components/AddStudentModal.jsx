@@ -6,12 +6,14 @@ import {
   Select,
   DatePicker,
   Button,
+  Row,
+  Col,
   notification,
 } from 'antd';
 import dayjs from 'dayjs';
-import { createStudent, updateStudent } from '../../../api/students';
-import { listClasses } from '../../../api/classes';
-import { useAuth } from '../../../context/AuthContext';
+import { useCreateStudent, useUpdateStudent } from '../../../hooks/useStudents';
+import { listAllClasses } from '../../../api/classes';
+import { useActiveSchool } from '../../../context/ActiveSchoolContext';
 
 export default function AddStudentModal({
   isOpen,
@@ -20,7 +22,9 @@ export default function AddStudentModal({
   editData,
 }) {
   const [form] = Form.useForm();
-  const { user } = useAuth();
+  const { activeSchoolId } = useActiveSchool();
+  const createMutation = useCreateStudent();
+  const updateMutation = useUpdateStudent();
   const [loading, setLoading] = useState(false);
   const [classes, setClasses] = useState([]);
 
@@ -54,7 +58,7 @@ export default function AddStudentModal({
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const data = await listClasses();
+        const data = await listAllClasses();
         setClasses(data);
       } catch (err) {
         console.error('Failed to load classes:', err);
@@ -66,10 +70,9 @@ export default function AddStudentModal({
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      // Resolve the tenant: a school-scoped user posts to their own school;
-      // a superuser (school_id === null) falls back to the selected class's school.
-      const selectedClass = classes.find((c) => c.id === values.class_id);
-      const schoolId = user?.school_id ?? selectedClass?.school_id;
+      // New students join the active school (top-bar switcher); the server
+      // re-validates that the user may write to it.
+      const schoolId = activeSchoolId;
 
       if (!schoolId) {
         notification.error({
@@ -101,10 +104,13 @@ export default function AddStudentModal({
 
       let result;
       if (editData?.id) {
-        result = await updateStudent(editData.id, payload);
+        result = await updateMutation.mutateAsync({
+          id: editData.id,
+          payload,
+        });
         notification.success({ message: 'Student updated successfully!' });
       } else {
-        result = await createStudent(payload);
+        result = await createMutation.mutateAsync(payload);
         notification.success({ message: 'Student added successfully!' });
       }
 
@@ -133,104 +139,120 @@ export default function AddStudentModal({
         onClose();
       }}
       footer={null}
-      className="list-details-modal" // Applies index.css glassmorphism styling
+      width={720}
     >
       <Form
         layout="vertical"
         form={form}
         onFinish={handleSubmit}
         initialValues={{ status: 'Active' }}
-        className="mt-4"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4">
-          <Form.Item
-            label="Full Name"
-            name="student_name"
-            rules={[{ required: true, message: 'Please input student name!' }]}
-          >
-            <Input placeholder="Enter full name" />
-          </Form.Item>
+        <Row gutter={16}>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Full Name"
+              name="student_name"
+              rules={[
+                { required: true, message: 'Please input student name!' },
+              ]}
+            >
+              <Input placeholder="Enter full name" />
+            </Form.Item>
+          </Col>
 
-          <Form.Item
-            label="Father's Name"
-            name="father_name"
-            rules={[{ required: true, message: "Please input father's name!" }]}
-          >
-            <Input placeholder="Enter father's name" />
-          </Form.Item>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Father's Name"
+              name="father_name"
+              rules={[
+                { required: true, message: "Please input father's name!" },
+              ]}
+            >
+              <Input placeholder="Enter father's name" />
+            </Form.Item>
+          </Col>
 
-          <Form.Item label="Contact Number" name="father_contact">
-            <Input placeholder="+1234567890" />
-          </Form.Item>
+          <Col xs={24} md={12}>
+            <Form.Item label="Contact Number" name="father_contact">
+              <Input placeholder="+1234567890" />
+            </Form.Item>
+          </Col>
 
-          <Form.Item label="Home Address" name="address">
-            <Input placeholder="123 Main St" />
-          </Form.Item>
+          <Col xs={24} md={12}>
+            <Form.Item label="Home Address" name="address">
+              <Input placeholder="123 Main St" />
+            </Form.Item>
+          </Col>
 
-          <Form.Item
-            label="Admission Number"
-            name="admission_number"
-            rules={[{ required: true, message: 'Required for uniqueness!' }]}
-          >
-            <Input placeholder="e.g. STU-2023-014" />
-          </Form.Item>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Admission Number"
+              name="admission_number"
+              rules={[{ required: true, message: 'Required for uniqueness!' }]}
+            >
+              <Input placeholder="e.g. STU-2023-014" />
+            </Form.Item>
+          </Col>
 
-          <Form.Item
-            label="Class"
-            name="class_id"
-            rules={[{ required: true, message: 'Class is required!' }]}
-          >
-            <Select placeholder="Select Class">
-              {classes.map((cls) => (
-                <Select.Option key={cls.id} value={cls.id}>
-                  {cls.class_name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
+          <Col xs={24} md={12}>
+            <Form.Item
+              label="Class"
+              name="class_id"
+              rules={[{ required: true, message: 'Class is required!' }]}
+            >
+              <Select placeholder="Select Class">
+                {classes.map((cls) => (
+                  <Select.Option key={cls.id} value={cls.id}>
+                    {cls.class_name}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </Col>
 
-          <Form.Item label="Section" name="section">
-            <Input placeholder="A, B, C..." />
-          </Form.Item>
+          <Col xs={24} md={12}>
+            <Form.Item label="Section" name="section">
+              <Input placeholder="A, B, C..." />
+            </Form.Item>
+          </Col>
 
-          <Form.Item label="Gender" name="gender">
-            <Select placeholder="Select gender">
-              <Select.Option value="Male">Male</Select.Option>
-              <Select.Option value="Female">Female</Select.Option>
-              <Select.Option value="Other">Other</Select.Option>
-            </Select>
-          </Form.Item>
+          <Col xs={24} md={12}>
+            <Form.Item label="Gender" name="gender">
+              <Select placeholder="Select gender">
+                <Select.Option value="Male">Male</Select.Option>
+                <Select.Option value="Female">Female</Select.Option>
+                <Select.Option value="Other">Other</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
 
-          <Form.Item label="Date of Birth" name="dob">
-            <DatePicker className="w-full" />
-          </Form.Item>
+          <Col xs={24} md={12}>
+            <Form.Item label="Date of Birth" name="dob">
+              <DatePicker className="w-full" />
+            </Form.Item>
+          </Col>
 
-          <Form.Item label="Admission Date" name="admission_date">
-            <DatePicker className="w-full" />
-          </Form.Item>
+          <Col xs={24} md={12}>
+            <Form.Item label="Admission Date" name="admission_date">
+              <DatePicker className="w-full" />
+            </Form.Item>
+          </Col>
 
-          <Form.Item label="Status" name="status">
-            <Select>
-              <Select.Option value="Active">Active</Select.Option>
-              <Select.Option value="Struck-off">Struck-off</Select.Option>
-            </Select>
-          </Form.Item>
-        </div>
+          <Col xs={24} md={12}>
+            <Form.Item label="Status" name="status">
+              <Select>
+                <Select.Option value="Active">Active</Select.Option>
+                <Select.Option value="Struck-off">Struck-off</Select.Option>
+              </Select>
+            </Form.Item>
+          </Col>
+        </Row>
 
-        <div className="flex justify-end gap-3 mt-4">
-          <Button
-            onClick={onClose}
-            disabled={loading}
-            className="bg-transparent border-[var(--border)] text-[var(--foreground)]"
-          >
+        <div className="ds-modal-footer">
+          <Button onClick={onClose} disabled={loading}>
             Cancel
           </Button>
-          <Button
-            type="primary"
-            htmlType="submit"
-            loading={loading}
-            className="btn-primary border-0"
-          >
+          <Button type="primary" htmlType="submit" loading={loading}>
             {editData ? 'Update Student' : 'Submit'}
           </Button>
         </div>

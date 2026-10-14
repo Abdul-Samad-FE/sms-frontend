@@ -149,20 +149,23 @@ export const getAntdThemeConfig = () => {
       colorBorder: border,
       colorBorderSecondary: border,
 
-      // Border radius — NOC aesthetic: sharp edges, but 2px on tiny controls
-      // keeps antd's visual polish on chips/inputs.
-      borderRadius: 2,
-      borderRadiusLG: 2,
-      borderRadiusSM: 2,
-      borderRadiusXS: 0,
+      // Border radius — mirrors the --radius-* scale in the theme CSS:
+      // controls 6px, cards / tables / modals 12px.
+      borderRadius: 6,
+      borderRadiusLG: 12,
+      borderRadiusSM: 4,
+      borderRadiusXS: 2,
 
       // Font
       fontFamily: fontSans,
       fontFamilyCode: fontSans,
-      fontSize: 13,
-      fontSizeHeading1: 32,
+      // Type scale — 14px body, 12px small; headings step down to the
+      // 16px section title.
+      fontSize: 14,
+      fontSizeSM: 12,
+      fontSizeHeading1: 30,
       fontSizeHeading2: 24,
-      fontSizeHeading3: 19,
+      fontSizeHeading3: 20,
       fontSizeHeading4: 16,
       fontSizeHeading5: 14,
 
@@ -196,6 +199,11 @@ export const getAntdThemeConfig = () => {
         defaultActiveBg: card,
         defaultActiveColor: foreground,
         defaultActiveBorderColor: primary,
+        // Flat buttons — elevation comes from cards, not controls.
+        primaryShadow: 'none',
+        defaultShadow: 'none',
+        dangerShadow: 'none',
+        fontWeight: 500,
         algorithm: true,
       },
       Input: {
@@ -249,12 +257,14 @@ export const getAntdThemeConfig = () => {
         colorBgContainer: card,
         colorText: foreground,
         colorBorderSecondary: border,
-        headerHeight: 28,
-        headerHeightSM: 24,
-        headerPadding: 10,
-        headerPaddingSM: 8,
-        bodyPadding: 10,
-        bodyPaddingSM: 8,
+        headerHeight: 52,
+        headerHeightSM: 44,
+        headerPadding: 20,
+        headerPaddingSM: 16,
+        headerFontSize: 15,
+        headerFontSizeSM: 14,
+        bodyPadding: 20,
+        bodyPaddingSM: 16,
       },
       Alert: {
         colorSuccessBg: muted,
@@ -271,9 +281,9 @@ export const getAntdThemeConfig = () => {
         colorErrorText: foreground,
       },
       Tag: {
-        defaultBg: primary,
-        defaultColor: '#ffffff',
-        fontSizeSM: 10,
+        defaultBg: muted,
+        defaultColor: foreground,
+        fontSizeSM: 12,
       },
       Table: {
         colorBgContainer: card,
@@ -284,35 +294,37 @@ export const getAntdThemeConfig = () => {
         rowHoverBg: muted,
         rowSelectedBg: primary + '22',
         rowSelectedHoverBg: primary + '33',
-        cellPaddingBlock: 4,
-        cellPaddingInline: 6,
-        cellPaddingBlockSM: 4,
-        cellPaddingInlineSM: 6,
-        headerSplitColor: border,
-        fontSize: 12,
+        // One table rhythm everywhere: 13px cells; the 12px semibold header
+        // style lives on `.data-table` in index.css.
+        cellFontSize: 13,
+        cellFontSizeMD: 13,
+        cellFontSizeSM: 13,
+        cellPaddingBlock: 12,
+        cellPaddingInline: 16,
+        cellPaddingBlockMD: 10,
+        cellPaddingInlineMD: 14,
+        cellPaddingBlockSM: 8,
+        cellPaddingInlineSM: 12,
+        headerSplitColor: 'transparent',
+        headerBorderRadius: 0,
       },
       Modal: {
+        // Every modal gets the same comfortable frame — 20px / 24px gutters
+        // and a 16px semibold title. Header / footer dividers live in
+        // index.css under `.ant-modal`.
         contentBg: card,
-        // Dark title-bar header — defined once here so every modal gets it automatically
-        headerBg: foreground,
-        titleColor: card,
-        titleFontSize: 12,
+        headerBg: card,
+        footerBg: card,
+        titleColor: foreground,
+        titleFontSize: 16,
         titleLineHeight: 1.5,
-        // Close icon colour on dark header
-        colorIcon: card,
-        colorIconHover: primary,
+        colorIcon: mutedForeground,
+        colorIconHover: foreground,
         colorText: foreground,
-        // Zero out antd's default outer content-padding; each modal controls its own spacing
-        paddingMD: 0,
-        paddingContentHorizontalLG: 0,
-        paddingContentVerticalLG: 0,
-        // Align close-button math (modalHeaderHeight & modalCloseBtnSize in antd's Modal
-        // style) with the compact header so the X sits flush in the title bar instead of
-        // overflowing into the body.
-        padding: 0,
-        fontSizeHeading5: 12,
-        lineHeightHeading5: 2.3,
-        controlHeight: 15,
+        paddingMD: 20,
+        paddingContentHorizontalLG: 24,
+        marginXS: 16,
+        marginSM: 20,
       },
       Drawer: {
         colorBgElevated: card,
@@ -347,12 +359,12 @@ export const getAntdThemeConfig = () => {
         itemHoverColor: primary, // color of a tab label on mouse hover
         inkBarColor: primary, // color of the animated underline indicator on the active tab
         cardBg: muted, // background of tab items when using card type
-        horizontalItemGutter: 16, // gap (px) between tab items in horizontal layout
-        horizontalItemPadding: '6px 20px', // padding inside each tab item (vertical horizontal)
+        horizontalItemGutter: 28, // gap (px) between tab items in horizontal layout
+        horizontalItemPadding: '10px 2px', // padding inside each tab item (vertical horizontal)
         horizontalItemPaddingLG: '2px 0px', // controls --ant-tabs-horizontal-item-padding-lg
-        titleFontSize: 11, // font size for tab labels at default size
-        titleFontSizeLG: 14, // font size for tab labels at large size
-        titleFontSizeSM: 10, // font size for tab labels at small size
+        titleFontSize: 14, // font size for tab labels at default size
+        titleFontSizeLG: 15, // font size for tab labels at large size
+        titleFontSizeSM: 13, // font size for tab labels at small size
       },
     },
   };

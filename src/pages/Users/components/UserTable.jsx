@@ -1,14 +1,41 @@
 import React from 'react';
-import { Button, Empty, Popconfirm, Space, Table, Tag } from 'antd';
-import { EditIcon, Trash2Icon } from '../../../components/Icons';
+import {
+  ActionButton,
+  ContentCard,
+  DataTable,
+  DeleteAction,
+  MutedCell,
+  PrimaryCell,
+  StatusTag,
+  TableActions,
+  TextCell,
+  EmptyCell,
+} from '../../../components/ui';
+
+/** "global" -> "Global Admin" etc. */
+export const levelLabel = (level) =>
+  ({
+    global: 'Global Admin',
+    super_admin: 'Super Admin',
+    school: 'School',
+  })[level] ?? 'School';
+
+const LEVEL_TONES = {
+  global: 'accent',
+  super_admin: 'primary',
+  school: 'info',
+};
 
 /**
- * Users table with role / school / status and permission-gated actions.
+ * Users table with level / role / tenant / status and permission-gated
+ * actions.
  *
  * @param {{
  *   users?: Array<import('../../../api/users').UserRecord>,
+ *   total?: number,             total matching users (all pages)
  *   loading?: boolean,
- *   schoolNameById?: Map<number, string>,
+ *   pagination?: import('antd').TablePaginationConfig,
+ *   toolbar?: React.ReactNode,  search / filters for the card header
  *   currentUserId?: number,
  *   onEdit?: (user) => void,
  *   onDelete?: (id: number) => void,
@@ -19,8 +46,10 @@ import { EditIcon, Trash2Icon } from '../../../components/Icons';
  */
 export default function UserTable({
   users = [],
+  total = users.length,
   loading = false,
-  schoolNameById = new Map(),
+  pagination,
+  toolbar,
   currentUserId,
   onEdit,
   onDelete,
@@ -34,50 +63,61 @@ export default function UserTable({
       dataIndex: 'name',
       key: 'name',
       render: (text, record) => (
-        <div>
-          <div className="font-semibold text-[var(--foreground)]">{text}</div>
-          <div className="text-[11px] text-[var(--muted-foreground)]">
-            {record.email}
-          </div>
-        </div>
+        <PrimaryCell secondary={record.email}>{text}</PrimaryCell>
+      ),
+    },
+    {
+      title: 'Level',
+      dataIndex: 'level',
+      key: 'level',
+      render: (level) => (
+        <StatusTag tone={LEVEL_TONES[level] ?? 'info'}>
+          {levelLabel(level)}
+        </StatusTag>
       ),
     },
     {
       title: 'Role',
       dataIndex: 'role_name',
       key: 'role_name',
+      // Global / Super Admin roles are implied by the level.
       render: (role, record) =>
-        record.is_superuser ? (
-          <Tag color="purple" className="border-0">
-            Superadmin
-          </Tag>
-        ) : role ? (
-          <Tag color="blue" className="border-0">
-            {role}
-          </Tag>
+        record.level && record.level !== 'school' ? (
+          <EmptyCell />
         ) : (
-          <span className="text-[var(--muted-foreground)]">—</span>
+          <TextCell>{role}</TextCell>
         ),
     },
     {
-      title: 'School',
-      dataIndex: 'school_id',
-      key: 'school_id',
-      render: (schoolId) =>
-        schoolId == null ? (
-          <span className="text-[var(--muted-foreground)]">All (global)</span>
-        ) : (
-          (schoolNameById.get(schoolId) ?? `#${schoolId}`)
-        ),
+      title: 'Organization / School',
+      key: 'tenant',
+      render: (_, record) => {
+        if (record.level === 'global') return <MutedCell>Platform</MutedCell>;
+        const school =
+          record.school_name ??
+          (record.school_id != null ? `#${record.school_id}` : null);
+        if (record.level === 'super_admin') {
+          return (
+            <PrimaryCell secondary="All schools">
+              {record.organization_name ?? '—'}
+            </PrimaryCell>
+          );
+        }
+        return (
+          <PrimaryCell secondary={record.organization_name}>
+            {school}
+          </PrimaryCell>
+        );
+      },
     },
     {
       title: 'Status',
       dataIndex: 'is_active',
       key: 'is_active',
       render: (active) => (
-        <Tag color={active ? 'green' : 'red'} className="border-0">
+        <StatusTag tone={active ? 'success' : 'danger'}>
           {active ? 'Active' : 'Inactive'}
-        </Tag>
+        </StatusTag>
       ),
     },
   ];
@@ -86,54 +126,45 @@ export default function UserTable({
     columns.push({
       title: 'Actions',
       key: 'actions',
+      align: 'right',
       render: (_, record) => {
         const isSelf = record.id === currentUserId;
         return (
-          <Space>
+          <TableActions>
             {canUpdate && (
-              <Button
-                size="small"
-                icon={<EditIcon className="w-4 h-4" />}
-                onClick={() => onEdit?.(record)}
-              />
+              <ActionButton onClick={() => onEdit?.(record)}>Edit</ActionButton>
             )}
             {canDelete && (
-              <Popconfirm
+              <DeleteAction
                 title="Delete this user?"
-                okText="Delete"
-                okButtonProps={{ danger: true }}
                 disabled={isSelf}
+                tooltip={
+                  isSelf ? 'You cannot delete your own account' : undefined
+                }
+                loading={deletingId === record.id}
                 onConfirm={() => onDelete?.(record.id)}
-              >
-                <Button
-                  size="small"
-                  danger
-                  disabled={isSelf}
-                  title={
-                    isSelf ? 'You cannot delete your own account' : undefined
-                  }
-                  loading={deletingId === record.id}
-                  icon={<Trash2Icon className="w-4 h-4" />}
-                />
-              </Popconfirm>
+              />
             )}
-          </Space>
+          </TableActions>
         );
       },
     });
   }
 
   return (
-    <div className="card-glass p-0 overflow-hidden border-[var(--card-border)] shadow-sm">
-      <Table
+    <ContentCard
+      title="All Users"
+      subtitle={`${total} account${total === 1 ? '' : 's'}`}
+      extra={toolbar}
+      flush
+    >
+      <DataTable
         columns={columns}
         dataSource={users}
-        rowKey="id"
         loading={loading}
-        pagination={{ pageSize: 10, hideOnSinglePage: true }}
-        scroll={{ x: 'max-content' }}
-        locale={{ emptyText: <Empty description="No users found." /> }}
+        pagination={pagination}
+        emptyText="No users found."
       />
-    </div>
+    </ContentCard>
   );
 }

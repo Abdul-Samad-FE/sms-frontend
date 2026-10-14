@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, notification } from 'antd';
+import { Alert, Form, Input, Button, notification } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
@@ -8,21 +8,32 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
+  // Lockout / rate-limit / disabled-account messages stay on screen, since
+  // the user has to act on them (wait, or contact an administrator).
+  const [blockedMessage, setBlockedMessage] = useState(null);
 
   const from = location.state?.from?.pathname || '/dashboard';
 
   const onFinish = async (values) => {
     setLoading(true);
+    setBlockedMessage(null);
     try {
-      await login(values);
+      const user = await login(values);
       notification.success({ message: 'Signed in successfully' });
-      navigate(from, { replace: true });
-    } catch (err) {
-      notification.error({
-        message: 'Sign in failed',
-        description:
-          err.response?.data?.detail || 'Check your credentials and try again.',
+      navigate(user?.is_first_login ? '/change-password' : from, {
+        replace: true,
       });
+    } catch (err) {
+      const status = err.response?.status;
+      const detail = err.response?.data?.detail;
+      if ((status === 429 || status === 403) && typeof detail === 'string') {
+        setBlockedMessage(detail);
+      } else {
+        notification.error({
+          message: 'Sign in failed',
+          description: detail || 'Check your credentials and try again.',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -30,15 +41,20 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--background)] p-4">
-      <div className="w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-2xl p-8">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">
-            School Management System
-          </h1>
-          <p className="text-sm text-[var(--muted-foreground)] mt-1">
-            Sign in to your account
-          </p>
+      <div className="ds-card w-full max-w-md p-8 shadow-[var(--shadow-md)]">
+        <div className="text-center mb-8">
+          <h1 className="ds-page-title">School Management System</h1>
+          <p className="ds-page-subtitle">Sign in to your account</p>
         </div>
+
+        {blockedMessage && (
+          <Alert
+            type="warning"
+            showIcon
+            title={blockedMessage}
+            className="!mb-6"
+          />
+        )}
 
         <Form layout="vertical" onFinish={onFinish} requiredMark={false}>
           <Form.Item
@@ -68,7 +84,8 @@ export default function Login() {
             htmlType="submit"
             loading={loading}
             block
-            className="btn-primary border-0 mt-2"
+            size="large"
+            className="mt-2"
           >
             Sign In
           </Button>

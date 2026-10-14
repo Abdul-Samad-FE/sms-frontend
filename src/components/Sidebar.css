@@ -11,8 +11,7 @@
   padding: 0;
   overflow: hidden;
   z-index: 100;
-  background-color: var(--sidebar-bg) !important;
-  backdrop-filter: blur(10px);
+  background-color: var(--card) !important;
   border-right: 1px solid var(--border);
   border-radius: 0;
 }
@@ -35,25 +34,52 @@
   justify-content: center !important;
   align-items: center !important;
   padding: 0 !important;
-  margin-bottom: 24px !important;
-  color: var(--accent) !important;
+  width: 44px !important;
+  height: 44px !important;
+  margin: 0 auto 10px !important;
+  border-radius: var(--radius) !important;
+  color: var(--muted-foreground) !important;
+}
+
+.sidebar-glass .ant-menu-item:not(.ant-menu-item-selected):hover {
+  background-color: var(--muted) !important;
+  color: var(--foreground) !important;
 }
 
 .sidebar-glass .ant-menu-item .anticon,
 .sidebar-glass .ant-menu-item svg {
   margin-right: 0 !important;
-  font-size: 24px !important;
+  font-size: 22px !important;
   color: inherit !important;
 }
 
 .sidebar-glass .ant-menu-item-selected {
   background-color: var(--primary) !important;
-  color: white !important;
-  border-radius: 8px !important;
+  color: var(--status-on-solid) !important;
 }
 
 .sidebar-glass .ant-menu-item-selected svg {
-  color: white !important;
+  color: var(--status-on-solid) !important;
+}
+
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.sidebar-logout:hover,
+.sidebar-logout:focus-visible {
+  background-color: color-mix(in srgb, var(--danger) 12%, transparent);
+  outline: none;
 }
 
 .sidebar-theme-toggle {

@@ -98,5 +98,16 @@
     ui-monospace, monospace;
   --font-sans: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
+  /* ── Layout & shape (shared design-system scale) ── */
+  --radius-sm: 6px; /* inputs, buttons, tags */
+  --radius: 8px; /* small panels, list items */
+  --radius-lg: 12px; /* cards, tables, modals */
+  --card-border: var(--border);
+  --border-subtle: #e3e8ef; /* row dividers inside cards */
+  --header-bg: color-mix(in srgb, var(--muted) 70%, var(--card));
+  --background-overlay: transparent;
+  --shadow-sm: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+  --shadow-md: 0 4px 12px -2px rgb(15 23 42 / 0.08);
+
   color-scheme: light;
 }

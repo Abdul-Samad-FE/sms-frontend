@@ -1,47 +1,53 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Alert, Button, notification } from 'antd';
+import { Alert, Button, Input, notification } from 'antd';
 import { useAuth } from '../../context/AuthContext';
-import { useClasses, useDeleteClass } from '../../hooks/useClasses';
-import { useStudents } from '../../hooks/useStudents';
-import { useTheme } from '../../theme';
+import { useClassesPage, useDeleteClass } from '../../hooks/useClasses';
+import { useStudentCount } from '../../hooks/useStudents';
+import { usePagination } from '../../hooks/usePagination';
+import useDebouncedValue from '../../hooks/useDebouncedValue';
+import { listAllClasses } from '../../api/classes';
+import { PageContainer, PageHeader, ContentCard } from '../../components/ui';
 import ClassSummaryCards from './components/ClassSummaryCards';
 import ClassTable from './components/ClassTable';
 import ClassFormModal from './components/ClassFormModal';
 import ExportCsvButton from '../../components/ExportCsvButton';
 
+const CLASS_CSV_COLUMNS = [
+  { header: 'Class Name', key: 'class_name' },
+  { header: 'Section', key: 'section' },
+  { header: 'Class Teacher', key: 'class_teacher_name' },
+  { header: 'Students', key: 'student_count' },
+  { header: 'Male', key: 'male_count' },
+  { header: 'Female', key: 'female_count' },
+];
+
 /**
- * Classes management — list, create, edit, delete; student counts are derived
- * from the (tenant-scoped) student list.
+ * Classes management — server-paginated list with class teacher and
+ * student / gender counts computed by the API.
  */
 export default function Classes() {
   const navigate = useNavigate();
-  const { toggleTheme } = useTheme();
-  const { user, hasPermission } = useAuth();
-  const isSuper = user?.is_superuser === true;
-  const canCreate = isSuper || hasPermission('class:create');
-  const canUpdate = isSuper || hasPermission('class:update');
-  const canDelete = isSuper || hasPermission('class:delete');
+  const { hasPermission } = useAuth();
+  const canCreate = hasPermission('class:create');
+  const canUpdate = hasPermission('class:update');
+  const canDelete = hasPermission('class:delete');
 
   const [modalOpen, setModalOpen] = useState(false);
   const [classToEdit, setClassToEdit] = useState(null);
+  const [searchText, setSearchText] = useState('');
+  const search = useDebouncedValue(searchText.trim(), 300) || undefined;
 
-  const classesQuery = useClasses();
-  const studentsQuery = useStudents({ limit: 1000 });
+  const paging = usePagination({ resetKeys: [search] });
+  const classesQuery = useClassesPage({ ...paging.params, search });
+  // Unfiltered class total for the KPI card (one-row count query).
+  const classTotalQuery = useClassesPage({ page: 1, page_size: 1 });
+  // Total enrolment (incl. students without a class) — a one-row count query.
+  const studentTotalQuery = useStudentCount();
   const deleteMutation = useDeleteClass();
 
-  const classes = classesQuery.data ?? [];
-  const students = studentsQuery.data ?? [];
-
-  const studentCountByClass = useMemo(() => {
-    const map = new Map();
-    for (const s of students) {
-      if (s.class_id != null) {
-        map.set(s.class_id, (map.get(s.class_id) ?? 0) + 1);
-      }
-    }
-    return map;
-  }, [students]);
+  const classes = classesQuery.data?.items ?? [];
+  const totalClasses = classesQuery.data?.meta.total ?? 0;
 
   const handleAdd = () => {
     setClassToEdit(null);
@@ -66,77 +72,65 @@ export default function Classes() {
   };
 
   return (
-    <div className="flex flex-col gap-6 p-6 min-h-screen">
-      <div className="flex flex-col md:flex-row md:items-center justify-between px-2 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[var(--foreground)]">
-            Class Management
-          </h1>
-          <p className="text-sm text-[var(--muted-foreground)] mt-1">
-            Organise classes and sections, and review enrolment per class.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-4">
-          <ExportCsvButton
-            filename="classes"
-            columns={[
-              { header: 'Class Name', key: 'class_name' },
-              { header: 'Section', key: 'section' },
-              {
-                header: 'Students',
-                accessor: (c) => studentCountByClass.get(c.id) ?? 0,
-              },
-            ]}
-            rows={classes}
-          />
-          {canCreate && (
-            <Button
-              type="primary"
-              onClick={handleAdd}
-              className="btn-primary border-0"
-            >
-              + Add Class
-            </Button>
-          )}
-          <button
-            onClick={toggleTheme}
-            className="hidden sm:block border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] px-4 py-2 flex-shrink-0 rounded-md text-sm font-medium cursor-pointer hover:bg-[var(--muted)] transition-colors shadow-sm"
-          >
-            Switch Theme
-          </button>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Class Management"
+        subtitle="Organise classes and sections, assign class teachers and review enrolment."
+        actions={
+          <>
+            <ExportCsvButton
+              filename="classes"
+              columns={CLASS_CSV_COLUMNS}
+              rows={classes}
+              fetchRows={() => listAllClasses({ search })}
+            />
+            {canCreate && (
+              <Button type="primary" onClick={handleAdd}>
+                + Add Class
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {classesQuery.isError ? (
-        <div className="px-2">
-          <Alert
-            type="error"
-            showIcon
-            message="Failed to load classes."
-            action={
-              <Button
-                size="small"
-                danger
-                onClick={() => classesQuery.refetch()}
-              >
-                Retry
-              </Button>
-            }
-          />
-        </div>
+        <Alert
+          type="error"
+          showIcon
+          title="Failed to load classes."
+          action={
+            <Button size="small" danger onClick={() => classesQuery.refetch()}>
+              Retry
+            </Button>
+          }
+        />
       ) : (
         <>
           <ClassSummaryCards
-            classCount={classes.length}
-            studentTotal={students.length}
+            classCount={classTotalQuery.data?.meta.total ?? 0}
+            studentTotal={studentTotalQuery.data ?? 0}
+            loading={classTotalQuery.isLoading}
           />
 
-          <div className="px-2">
+          <ContentCard
+            title="All Classes"
+            subtitle={`${totalClasses} class${totalClasses === 1 ? '' : 'es'}`}
+            flush
+            extra={
+              <Input.Search
+                allowClear
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+                placeholder="Search class or section"
+                aria-label="Search classes"
+                className="w-full sm:w-[260px]"
+              />
+            }
+          >
             <ClassTable
               classes={classes}
-              loading={classesQuery.isLoading}
-              studentCountByClass={studentCountByClass}
+              loading={classesQuery.isFetching}
+              pagination={paging.tableProps(classesQuery.data?.meta)}
               onView={(cls) => navigate(`/classes/${cls.id}`)}
               onEdit={handleEdit}
               onDelete={handleDelete}
@@ -146,7 +140,7 @@ export default function Classes() {
                 deleteMutation.isPending ? deleteMutation.variables : null
               }
             />
-          </div>
+          </ContentCard>
         </>
       )}
 
@@ -158,6 +152,6 @@ export default function Classes() {
         }}
         editData={classToEdit}
       />
-    </div>
+    </PageContainer>
   );
 }

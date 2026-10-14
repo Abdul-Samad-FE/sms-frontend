@@ -1,7 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { Select, Button, notification } from 'antd';
-import { listStudents, deleteStudent } from '../../api/students';
-import { listClasses } from '../../api/classes';
+import React, { useState } from 'react';
+import { Select, Button, Input, notification } from 'antd';
+import { listStudents } from '../../api/students';
+import { MAX_PAGE_SIZE } from '../../api/pagination';
+import { usePagination } from '../../hooks/usePagination';
+import { useAllClasses } from '../../hooks/useClasses';
+import { useDeleteStudent, useStudents } from '../../hooks/useStudents';
+import useDebouncedValue from '../../hooks/useDebouncedValue';
 import StudentCards from './components/StudentCards';
 import StudentTable from './components/StudentTable';
 import AddStudentModal from './components/AddStudentModal';
@@ -9,7 +13,7 @@ import StudentViewModal from './components/StudentViewModal';
 import StudentCardModal from './components/StudentCardModal';
 import PermissionGuard from '../../components/PermissionGuard';
 import ExportCsvButton from '../../components/ExportCsvButton';
-import { useTheme } from '../../theme';
+import { PageContainer, PageHeader, ContentCard } from '../../components/ui';
 
 const STUDENT_CSV_COLUMNS = [
   { header: 'Admission No', key: 'admission_number' },
@@ -31,37 +35,27 @@ const STUDENT_CSV_COLUMNS = [
 ];
 
 export default function Students() {
-  const { toggleTheme } = useTheme();
-  const [selectedClass, setSelectedClass] = useState('All'); // Will store class_id (number) or 'All'
-  const [studentsArray, setStudentsArray] = useState([]);
-  const [classes, setClasses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedClass, setSelectedClass] = useState('All'); // class_id (number) or 'All'
+  const [searchText, setSearchText] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [studentToEdit, setStudentToEdit] = useState(null);
   const [studentToView, setStudentToView] = useState(null);
   const [studentToCard, setStudentToCard] = useState(null);
 
-  const fetchClasses = async () => {
-    try {
-      const data = await listClasses();
-      setClasses(data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  const search = useDebouncedValue(searchText.trim(), 300);
+  const classId = selectedClass === 'All' ? undefined : selectedClass;
 
-  const fetchStudents = async () => {
-    setLoading(true);
-    try {
-      const data = await listStudents();
-      setStudentsArray(data);
-    } catch (err) {
-      console.error(err);
-      notification.error({ message: 'Failed to load live student data.' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Filters shared by the table, the KPI cards and the CSV export.
+  const filters = { class_id: classId, search: search || undefined };
+
+  const { data: classes = [] } = useAllClasses();
+  const paging = usePagination({ resetKeys: [classId, search] });
+  const studentsQuery = useStudents({ ...filters, ...paging.params });
+  const deleteMutation = useDeleteStudent();
+
+  const changeClass = (value) => setSelectedClass(value);
+
+  const changeSearch = (e) => setSearchText(e.target.value);
 
   const handleAddClick = () => {
     setStudentToEdit(null);
@@ -73,100 +67,96 @@ export default function Students() {
     setIsModalOpen(true);
   };
 
-  useEffect(() => {
-    fetchStudents();
-    fetchClasses();
-  }, []);
-
   const handleDelete = async (id) => {
     try {
-      await deleteStudent(id);
+      await deleteMutation.mutateAsync(id);
       notification.success({ message: 'Student deleted successfully!' });
-      fetchStudents(); // Refresh table
     } catch (err) {
-      console.error('Delete Error:', err.response || err);
       notification.error({
-        message: 'Failed to delete student. Please check if the ID is valid.',
+        message: 'Failed to delete student',
+        description: err?.response?.data?.detail || err?.message,
       });
     }
   };
 
-  // Derived state
-  const filteredStudents = useMemo(() => {
-    if (selectedClass === 'All') return studentsArray;
-    return studentsArray.filter(
-      (student) => student.class_id === selectedClass
-    );
-  }, [selectedClass, studentsArray]);
+  // Export every row matching the current filters, not just this page.
+  const fetchAllForExport = async () => {
+    const all = await listStudents({
+      ...filters,
+      page: 1,
+      page_size: MAX_PAGE_SIZE,
+    });
+    return all.items;
+  };
 
   return (
-    <div className="flex flex-col gap-6 p-6 min-h-screen">
-      {/* Header and Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between px-2 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-3 text-[var(--foreground)]">
-            Student Management
-          </h1>
-          <p className="text-sm text-[var(--muted-foreground)] mt-1">
-            Manage admissions, view profiles, and analyze student distribution.
-          </p>
-        </div>
+    <PageContainer>
+      <PageHeader
+        title="Student Management"
+        subtitle="Manage admissions, view profiles, and analyze student distribution."
+        actions={
+          <>
+            <ExportCsvButton
+              filename="students"
+              columns={STUDENT_CSV_COLUMNS}
+              fetchRows={fetchAllForExport}
+            />
+            <PermissionGuard permission="student:create">
+              <Button type="primary" onClick={handleAddClick}>
+                + Add Student
+              </Button>
+            </PermissionGuard>
+          </>
+        }
+      />
 
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2 bg-[var(--muted)] px-3 py-2 rounded-lg border border-[var(--border)]">
-            <span className="text-sm text-[var(--muted-foreground)] font-medium">
-              Filter by Class:
-            </span>
+      <StudentCards classId={classId} />
+
+      <ContentCard
+        title="Students Directory"
+        subtitle={
+          studentsQuery.data
+            ? `${studentsQuery.data.meta.total} student(s)`
+            : undefined
+        }
+        flush
+        extra={
+          <div className="flex flex-wrap items-center gap-2">
+            <Input.Search
+              allowClear
+              value={searchText}
+              onChange={changeSearch}
+              placeholder="Search name, admission no, father…"
+              aria-label="Search students"
+              className="w-full sm:w-[260px]"
+            />
+            <span className="ds-label">Class</span>
             <Select
               value={selectedClass}
-              onChange={(val) => setSelectedClass(val)}
-              className="dashboard-time-select min-w-[120px]"
-              dropdownClassName="dashboard-select-dropdown"
-              bordered={false}
+              onChange={changeClass}
+              className="min-w-[160px]"
+              aria-label="Filter by class"
               options={[
                 { value: 'All', label: 'All Classes' },
                 ...classes.map((c) => ({ value: c.id, label: c.class_name })),
               ]}
             />
           </div>
-
-          <ExportCsvButton
-            filename="students"
-            columns={STUDENT_CSV_COLUMNS}
-            rows={filteredStudents}
-          />
-
-          <PermissionGuard permission="student:create">
-            <Button
-              type="primary"
-              onClick={handleAddClick}
-              className="btn-primary border-0"
-            >
-              + Add Student
-            </Button>
-          </PermissionGuard>
-
-          <button
-            onClick={toggleTheme}
-            className="hidden sm:block border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] px-4 py-2 flex-shrink-0 rounded-md text-sm font-medium cursor-pointer hover:bg-[var(--muted)] transition-colors shadow-sm"
-          >
-            Switch Theme
-          </button>
-        </div>
-      </div>
-
-      <StudentCards students={filteredStudents} />
-
-      <div className="px-2">
+        }
+      >
         <StudentTable
-          students={filteredStudents}
-          loading={loading}
+          students={studentsQuery.data?.items ?? []}
+          loading={studentsQuery.isFetching}
+          pagination={paging.tableProps(studentsQuery.data?.meta)}
+          deletingId={
+            deleteMutation.isPending ? deleteMutation.variables : null
+          }
           onEdit={handleEditClick}
           onViewDetail={(s) => setStudentToView(s)}
           onViewCard={(s) => setStudentToCard(s)}
           onDelete={handleDelete}
         />
-      </div>
+      </ContentCard>
 
       <AddStudentModal
         isOpen={isModalOpen}
@@ -178,7 +168,6 @@ export default function Students() {
         onSuccess={() => {
           setIsModalOpen(false);
           setStudentToEdit(null);
-          fetchStudents(); // Refresh table!
         }}
       />
 
@@ -195,6 +184,6 @@ export default function Students() {
         onClose={() => setStudentToCard(null)}
         student={studentToCard}
       />
-    </div>
+    </PageContainer>
   );
 }

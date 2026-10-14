@@ -82,7 +82,7 @@ export default function RoleFormModal({ open, onClose, editData }) {
       key: 'details',
       label: 'Details',
       children: (
-        <Form form={form} layout="vertical" className="pt-2">
+        <Form form={form} layout="vertical">
           <Form.Item
             name="role_name"
             label="Role Name"
@@ -115,13 +115,11 @@ export default function RoleFormModal({ open, onClose, editData }) {
       key: 'modules',
       label: `Modules (${moduleIds.length})`,
       children: (
-        <div className="pt-2">
-          <ModuleAssignment
-            modules={modules}
-            value={moduleIds}
-            onChange={setModuleIds}
-          />
-        </div>
+        <ModuleAssignment
+          modules={modules}
+          value={moduleIds}
+          onChange={setModuleIds}
+        />
       ),
     },
   ];
@@ -133,7 +131,7 @@ export default function RoleFormModal({ open, onClose, editData }) {
       onCancel={onClose}
       onOk={handleOk}
       okText={isEdit ? 'Save' : 'Create'}
-      width={640}
+      width={720}
       confirmLoading={createMutation.isPending || updateMutation.isPending}
       destroyOnHidden
     >

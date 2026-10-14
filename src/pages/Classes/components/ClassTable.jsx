@@ -1,14 +1,23 @@
 import React from 'react';
-import { Button, Empty, Popconfirm, Space, Table, Tag } from 'antd';
-import { EyeIcon, EditIcon, Trash2Icon } from '../../../components/Icons';
+import {
+  DataTable,
+  TableActions,
+  ActionButton,
+  DeleteAction,
+  MonoCell,
+  MutedCell,
+  renderPrimary,
+  renderText,
+} from '../../../components/ui';
 
 /**
- * Classes table with per-class student counts and permission-gated actions.
+ * Classes table: class teacher, enrolment and gender split per class, with
+ * permission-gated actions. Pagination is driven by the server.
  *
  * @param {{
  *   classes?: Array<import('../../../api/classes').ClassRecord>,
  *   loading?: boolean,
- *   studentCountByClass?: Map<number, number>,
+ *   pagination?: import('antd').TablePaginationConfig,
  *   onView?: (cls) => void,
  *   onEdit?: (cls) => void,
  *   onDelete?: (id: number) => void,
@@ -20,7 +29,7 @@ import { EyeIcon, EditIcon, Trash2Icon } from '../../../components/Icons';
 export default function ClassTable({
   classes = [],
   loading = false,
-  studentCountByClass = new Map(),
+  pagination,
   onView,
   onEdit,
   onDelete,
@@ -30,86 +39,75 @@ export default function ClassTable({
 }) {
   const columns = [
     {
-      title: 'Class Name',
+      title: 'Class',
       dataIndex: 'class_name',
       key: 'class_name',
-      render: (text) => (
-        <span className="font-semibold text-[var(--foreground)]">{text}</span>
-      ),
+      render: renderPrimary,
     },
     {
       title: 'Section',
       dataIndex: 'section',
       key: 'section',
-      render: (section) =>
-        section ? (
-          <Tag className="border-0">{section}</Tag>
-        ) : (
-          <span className="text-[var(--muted-foreground)]">—</span>
-        ),
+      render: renderText,
+    },
+    {
+      title: 'Class Teacher',
+      dataIndex: 'class_teacher_name',
+      key: 'class_teacher_name',
+      render: (name) =>
+        name ? renderText(name) : <MutedCell>Not assigned</MutedCell>,
     },
     {
       title: 'Students',
-      key: 'students',
-      render: (_, record) => (
-        <span className="font-mono">
-          {studentCountByClass.get(record.id) ?? 0}
-        </span>
-      ),
+      dataIndex: 'student_count',
+      key: 'student_count',
+      align: 'right',
+      render: (n) => <MonoCell>{n ?? 0}</MonoCell>,
+    },
+    {
+      title: 'Male',
+      dataIndex: 'male_count',
+      key: 'male_count',
+      align: 'right',
+      render: (n) => <MonoCell>{n ?? 0}</MonoCell>,
+    },
+    {
+      title: 'Female',
+      dataIndex: 'female_count',
+      key: 'female_count',
+      align: 'right',
+      render: (n) => <MonoCell>{n ?? 0}</MonoCell>,
     },
     {
       title: 'Actions',
       key: 'actions',
+      align: 'right',
       render: (_, record) => (
-        <Space>
-          <Button
-            size="small"
-            icon={<EyeIcon className="w-4 h-4" />}
-            onClick={() => onView?.(record)}
-          >
-            View
-          </Button>
+        <TableActions>
+          <ActionButton onClick={() => onView?.(record)}>View</ActionButton>
           {canUpdate && (
-            <Button
-              size="small"
-              icon={<EditIcon className="w-4 h-4" />}
-              onClick={() => onEdit?.(record)}
-            />
+            <ActionButton onClick={() => onEdit?.(record)}>Edit</ActionButton>
           )}
           {canDelete && (
-            <Popconfirm
+            <DeleteAction
               title="Delete this class?"
               description="Students in this class will be unassigned."
-              okText="Delete"
-              okButtonProps={{ danger: true }}
+              loading={deletingId === record.id}
               onConfirm={() => onDelete?.(record.id)}
-            >
-              <Button
-                size="small"
-                danger
-                loading={deletingId === record.id}
-                icon={<Trash2Icon className="w-4 h-4" />}
-              />
-            </Popconfirm>
+            />
           )}
-        </Space>
+        </TableActions>
       ),
     },
   ];
 
   return (
-    <div className="card-glass p-0 overflow-hidden border-[var(--card-border)] shadow-sm">
-      <Table
-        columns={columns}
-        dataSource={classes}
-        rowKey="id"
-        loading={loading}
-        pagination={{ pageSize: 10, hideOnSinglePage: true }}
-        scroll={{ x: 'max-content' }}
-        locale={{
-          emptyText: <Empty description="No classes yet." />,
-        }}
-      />
-    </div>
+    <DataTable
+      columns={columns}
+      dataSource={classes}
+      loading={loading}
+      pagination={pagination}
+      emptyText="No classes yet."
+    />
   );
 }

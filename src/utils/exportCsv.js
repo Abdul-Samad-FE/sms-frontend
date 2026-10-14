@@ -51,7 +51,8 @@ export function toCsv(columns, rows) {
  */
 export function exportToCsv(filename, columns, rows) {
   const csv = toCsv(columns, rows ?? []);
-  const blob = new Blob([`﻿${csv}`], {
+  // Leading BOM so Excel opens the file as UTF-8.
+  const blob = new Blob([`\uFEFF${csv}`], {
     type: 'text/csv;charset=utf-8;',
   });
   const url = URL.createObjectURL(blob);
